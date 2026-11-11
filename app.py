@@ -2,7 +2,7 @@
 
 APP_NAME = 'Zero Hour Earth'
 VERSION = '0.53.5'
-import math, os, random, re, sys, threading, traceback
+import math, os, random, re, subprocess, sys, threading, traceback
 
 import catalog, editor, generator, online, preflight, tr
 from tr import T
@@ -1675,7 +1675,9 @@ def gui():
             def done():
                 show_preview(out)
                 if openf.get():
-                    try: os.startfile(os.path.dirname(out))
+                    try:
+                        if sys.platform == 'win32': os.startfile(os.path.dirname(out))
+                        else: subprocess.Popen(['open' if sys.platform == 'darwin' else 'xdg-open', os.path.dirname(out)])
                     except Exception: pass
                 messagebox.showinfo(T('Hotovo'), T('Mapa je vytvorená:\n') + out + T('\n\nReštartuj hru a nájdeš ju medzi skirmish mapami.'))
             root.after(0, done)

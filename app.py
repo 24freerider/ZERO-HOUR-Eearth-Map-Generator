@@ -1278,9 +1278,7 @@ def gui():
             n = catalog.raise_road_limit(gxdir.get(), source_dir=gdir.get())
             messagebox.showinfo(T('Limit ciest'), T('Limit ciest v GeneralsX je zvýšený na ') + str(n) +
                                 T('.\n\nPlatí po reštarte GeneralsX. Spoluhráči ho potrebujú tiež (rovnaké dáta), '
-                                  'inak sa nepripoja.') +
-                                T('\n\nUpravený GameData.ini mení dáta hry: s ním sa nepripojíš k hráčom, ktorí ho nemajú (online hra). '
-                                  'Tlačidlom na vrátenie limitu ho odstrániš.'))
+                                  'inak sa nepripoja.'))
         except Exception as ex:
             messagebox.showerror(T('Limit ciest'), T(str(ex)))
         show_limit()

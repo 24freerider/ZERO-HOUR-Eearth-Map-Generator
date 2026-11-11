@@ -24,7 +24,14 @@ def _write_atomic(path, data, mode='wb'):
                                          suffix='.part', delete=False) as temporary:
             temporary_path = temporary.name
             temporary.write(data)
-        os.replace(temporary_path, path)
+        for attempt in range(5):
+            try:
+                os.replace(temporary_path, path)
+                break
+            except PermissionError as error:
+                if getattr(error, 'winerror', None) not in (5, 32) or attempt == 4:
+                    raise
+                time.sleep(0.02 * (attempt + 1))
         temporary_path = None
     finally:
         if temporary_path is not None:

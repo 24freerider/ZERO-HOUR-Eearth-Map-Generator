@@ -1,0 +1,104 @@
+ZERO HOUR EARTH - SOURCE CODE GUIDE
+===================================
+Real-world skirmish map generator for C&C Generals: Zero Hour. Plain Python, no game files included.
+Comments and identifiers in the code are English; the user interface strings are written in Slovak and
+translated to English at runtime by tr.py.
+
+
+RUN FROM SOURCE
+  Windows: double-click run.bat (creates .venv, installs requirements.txt, starts app.py).
+  Any OS:  python -m venv .venv  ->  activate  ->  pip install -r requirements.txt  ->  python app.py
+  Python 3.10+ with tkinter. Libraries: numpy, pillow, requests.
+
+  Command line, no window:
+    python app.py --cli "Banská Bystrica" --km 1.5 --scale 1 --game "C:\Games\Zero Hour" --out "C:\maps"
+
+  Offline self test (synthetic town, needs only your INIZH.big):
+    python selftest.py "C:\path\to\Zero Hour"
+
+  Build the shareable .exe: build_exe.bat (PyInstaller, one file). The zip it makes contains the exe,
+  README, CHANGELOG and this source code (folder "source").
+
+
+FILES
+  app.py        Window (tkinter), all options, settings, run_generation() = the whole pipeline:
+                game catalog -> OSM download -> elevation -> generator -> .map + preview + menu thumbnail.
+  generator.py  class Gen: builds the map. Gen.run() lists every step in order (terrain, water, roads, bases,
+                fortress / outposts, buildings, insurgents, fences, details, trees, life, AI paths, patrols,
+                train, textures, scripts). Gen is assembled from topic modules (mixins):
+                gconst.py (constants, model tables - building models, styles and tunables live here),
+                g_terrain, g_roads, g_buildings, g_bases, g_nature, g_insurgents, g_zini, g_zmode, g_invasion, g_output.
+  mapio.py      Reads / writes the .map format ("CkMp" chunk files): height map, texture tiles and blends,
+                objects with property dictionaries, sides / teams, scripts, triggers, waypoint links.
+                MapFile.read(p).write(q) reproduces a file byte for byte.
+  online.py     OpenStreetMap (Overpass, several servers raced in parallel), geocoding (Nominatim),
+                elevation tiles (AWS terrain tiles, "terrarium"). Everything is cached on disk.
+  catalog.py    Reads INIZH.big / INI.big of the installed game: building sizes, road widths, every object
+                name, garrison capacities. So mods with other objects work too.
+  editor.py     Map editor window: per-building type / floors, insurgent bases, insurgent areas.
+  mappicker.py  The OSM tile map for picking the area and manual player starts.
+  geo.py        Projection (lat/lon <-> game units), polygon / polyline helpers.
+  tr.py         Slovak -> English strings; T() translates exact strings and phrases inside log lines.
+  template.map  Clean technical template: texture palette, lighting, player sides and four prototype objects
+                whose property layout new objects copy. No content of its own.
+  selftest.py   Offline end-to-end test on synthetic OSM data.
+
+
+KEY FACTS ABOUT THE GAME FORMAT (learned the hard way)
+  * 1 tile = 10 world units. At scale 1:1 one unit = 0.25 m (one tile = 2.5 m). Height: 256 steps of
+    0.625 units, so at 1:1 about 38 m of relief in total - the terrain modes compress the regional rise.
+  * Texture tile index (as World Builder computes it):
+      ((first + (x//2) % w + w*((y//2) % w)) << 2) + 2*(y & 1) + (x & 1)   -> mapio.tile_index
+  * The engine draws at most 4000 trees; extra ones silently disappear.
+  * The engine keeps at most 4000 road segments (MaxRoadSegments): one per pair of road points, plus one per
+    30 degrees of every bend and pieces at junctions. Roads after that are skipped. The limit is read from GameData.ini
+    (catalog.road_segments); catalog.raise_road_limit() writes a loose Data\INI\GameData.ini with 40000. A map.ini
+    cannot raise it: the road buffer is allocated once at game start, before any map.ini is loaded.
+  * Skirmish AI attacks along waypoint paths labelled <Center|Flank|Backdoor><enemy start + 1>
+    (AISkirmishPlayer / ScriptActions in the EA source). Every base gets paths from every other base.
+    The insurgent side has its own start index (12), so its paths are Center13 / Flank13 / Backdoor13.
+  * Insurgents are an extra FactionCivilian side (kept in skirmish); start-up scripts make them enemies of
+    player0..player11, put soldiers into houses (NAMED_GARRISON_SPECIFIC_BUILDING) and send technicals on
+    closed waypoint loops. Factories repeat CREATE_UNNAMED_ON_TEAM_AT_WAYPOINT every N seconds while
+    NAMED_NOT_DESTROYED holds (script "delay" field, not one-shot).
+  * Skirmish AI scripts resolve '[Skirmish]MyOuterPerimeter' etc. to polygon triggers InnerPerimeter<n> /
+    OuterPerimeter<n> (n = start + 1). Without them the AI never attacks (Gen.build_script_areas).
+  * Insurgent waves: units are created on singleton teams teamInsWave<k>; a repeating script with
+    PLAYER_HAS_COMPARISON_UNIT_TYPE_IN_TRIGGER_AREA (>= N tanks in EARTH_InsBase<k>) sends the team TEAM_HUNT.
+  * Trains: RailroadBehavior anchors the locomotive on the nearest waypoint and follows link 0. Waypoint
+    names ending in "Station" make it stop, "Tunnel" keeps its height (used over bridges). The track is
+    built out and back, so it is a closed loop.
+  * Rivers are water polygons flagged as river with the start index of the flow direction.
+  * Game modes (Gen.mode_scripts): skirmish declares victory as soon as one alliance is left and FactionCivilian
+    sides (the insurgents) do not count, so a lone player wins at once. The modes therefore need one AI slot: player0 and
+    player1..11 are made NEUTRAL, the AI gets PLAYER_SET_MONEY 0; when PLAYER_ALL_DESTROYED(insurgents) everybody turns
+    ALLIES -> the engine's own victory.
+  * Zombie mode (Gen.zombie_scripts): scripts and teams on the map side "SkirmishGLA". In skirmish a GLA AI player copies
+    that side's scripts and teams (Player.cpp, duplicateAndQualify) - the trick of "[zombies] wheel of death". When any
+    non-civilian side has scripts, the standard SkirmishScripts.scb is not loaded. Counters are shown with
+    DISPLAY_COUNTER + a map.str next to the map (labels SCRIPT:EARTH_ZRound ...).
+  * Invasion runs on the last start's base GLA AI, using the same skirmish script/teams binding as Zombie.
+    The chosen faction determines which unit templates are spawned. The game places a player's command centre
+    at Player_N_Start and their faction's builder at Player_N_Rally.
+
+
+WHERE THINGS ARE STORED (per user)
+  ~/.cncearth/settings.json      window options
+  ~/.cncearth/cache/             OSM answers and elevation tiles
+  ~/.cncearth/tiles/             map tiles of the area picker
+  ~/.cncearth/edits/<map>.json   editor choices for a map (+ <map>_bg.png background)
+
+
+ADDING THINGS
+  * Another building model: gconst.py, STYLES['eu'] (per class) or the PANEL_* / FLAT_PIECES / GARAGE_PIECES
+    lists. Names must exist in the game (catalog.Catalog.buildings).
+  * Another OSM feature: add it to the Overpass query in online._query, parse it in online.parse_osm,
+    use it in a new Gen.place_* step called from Gen.run().
+  * New window text: write it in Slovak in app.py and add the English line to tr.EN.
+
+
+DATA AND CREDITS
+  Map data (c) OpenStreetMap contributors, ODbL. Elevation: Mapzen / AWS Terrain Tiles.
+  Map tiles in the area picker: tile.openstreetmap.org (please respect its usage policy).
+  Command & Conquer Generals: Zero Hour is (c) Electronic Arts; no game files are included - the program reads
+  them from your own installation.

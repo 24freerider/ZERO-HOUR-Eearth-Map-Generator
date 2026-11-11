@@ -1,0 +1,811 @@
+ZERO HOUR EARTH - changelog
+===========================
+Versioning: 0.X.Y - X = new feature / bigger change, Y = bug fix.
+Versions 0.1 - 0.8 were numbered afterwards (the program used to be called "CNC Earth").
+
+v0.53.5
+- Restored the v0.52.1 Continuous Zombie spawn rate, unit mix and boss schedule. The phase counter keeps advancing and the active zombie limit remains configurable.
+
+v0.53.4
+- Restored the previous road and junction rendering, with yellow lines on side streets and white dashed lines on major roads.
+
+v0.53.3
+- Invasion ground squads enter near the map edges with random timing, direction and group sizes.
+- Ground squads seek hostile units and buildings along the way.
+
+v0.53.2
+- Junctions keep the main road continuous and connect side roads with short unmarked sections.
+- Roundabouts use a closed loop and residential streets use narrower, unmarked asphalt.
+- Roads and tracks respect gaps in OSM geometry. Dirt roads use their own surface without additional ground paint.
+
+v0.53.1
+- Invasion attacks run through the last start's base GLA AI, like Zombie.
+- Residential and access roads are rendered as native roads again, with dashed white markings.
+
+v0.53.0
+- Invasion: co-op defence of one shared headquarters, hidden starting command centres, and one builder per defender.
+- Configurable preparation time (default three minutes) and escalating attacks from a selected faction.
+
+v0.52.4
+- Main roads use white dashed markings. Residential streets and access lanes use plain asphalt.
+- OSM road surfaces distinguish cobbles, concrete, gravel, dirt and rutted tracks.
+- Parking bays use ParkingLines strips, with cars positioned in the same rows.
+
+v0.52.3
+- Standard skirmish prepares level build pads and protects approaches to starting supplies in automatic and manual layouts.
+- Town → Advanced exposes small-building density, the fallback floor count and tall-building stacking.
+
+v0.52.2
+- Adjust the settings panel using its divider.
+- Continuous mode has an editable active-zombie cap (default 180), shown during play.
+- Continuous phases continue past level 40, with faster spawns and more high-tier zombies when tiers are enabled.
+
+v0.52.1
+- Respawn Ambush replaces the Survival and Defense paradrop. After losing your shop vehicle, use the sidebar ability to place a Humvee instantly on open ground.
+- Respawn works in solo Survival. In co-op, a full team wipe still ends the match.
+
+v0.52.0
+- Resizable settings panel, compact navigation and editable numbers beside sliders.
+- West–east map shapes (2:1, 3:1, 4:1) and a north-vs-south start layout.
+- Manual starts show base boundaries. The generator finds, levels and clears nearby dry build pads for the AI.
+- Landscape adds rocks, stumps and bushes along banks, in forests and on slopes.
+- Classic Zombie without Clearance spawns from a central tunnel. Choose waves or continuous spawns with rising difficulty.
+- Survival and Defense expose the Humvee airdrop in the sidebar and keep its source under player control through delivery.
+
+v0.51.2 - internal: generator.py split into smaller files
+- The generator's behaviour is unchanged (verified: the same map byte for byte before and after the split, in 6 modes and on the real Poltar data).
+- generator.py (4900 lines) is now the core plus the modules gconst.py (constants), g_terrain, g_roads, g_buildings, g_bases, g_nature, g_insurgents, g_zini, g_zmode, g_output. Every further change touches just one smaller file.
+
+v0.51.1 - overpasses and manual stacking of blocks of flats
+- Overpasses: when two roads cross without a shared junction and one of them is tagged as a bridge in OSM (bridge / layer), the upper road becomes a real bridge. The ground round the upper road is raised to deck height (an embankment with gentle ramps); only a strip along the lower road (also a motorway with both carriageways, or a railway) stays at road level, so units can drive under the bridge. The bridge type follows the upper road (four-lane, two-lane, cobblestone, wooden). Crossings without a bridge tag are left as they were.
+- Editor: new field "Stack: extra floors (0-6)" and quick buttons Stack +1 / +2 / +3 / = 0. The same model is put on top of the selected block of flats (several at once too). Works on AsiaApartment02 and AsianApartmentSingle01 (not on CivilianHighrise02). The value is saved with the map's edits and used every time the map is generated again.
+
+v0.51.0 – setting up the map before generating
+- Pre-check above the Generate button: whether the OSM data is already cached or has to be downloaded, number of buildings in the area (after the quick preview), warnings (too many streets for the 4000 road-segment limit, overlapping or too large bases, missing INIZH.big, a map with this name already exists)
+- Quick OSM preview (Area page): roads, water, forests and building density drawn over the map picker before generating (areas up to 8 km)
+- The automatic start layout (corners, circle, two teams, Clearance, Zombie Survival ...) is drawn on the map with the base squares of "Base space"; it uses the same code as the generator (preflight.layout_rel)
+- A map with the same name no longer gets overwritten silently: the program asks – overwrite, or create a new one (Name_2, Name_3 ...)
+- Setting profiles (Export page): save the whole setup including the place and manual starts under a name; four built-in templates (normal skirmish, Clearance, Zombie Survival, Zombie Defense)
+- Search shows several candidates to pick from; the ★ button next to the search box keeps favourite and recently used places
+- Random button next to the seed
+- Settings are saved automatically a moment after every change (not only when closing or generating); the open/closed state of the log is now remembered too
+
+v0.50.7
+- Fields: the brown texture SandType1darker (picked in World Builder)
+- Car parks: the ParkingLotType1c / 1d texture with bay lines, the line direction follows the car park; cars stand 2.5 m apart between the lines
+
+v0.50.6
+- Fields outside the town: grey or brown satellite colour (harvested, bare field) is now the ploughed CropsType1, not concrete or grey soil; grey = built-up ground only in town near buildings
+
+v0.50.6
+- Fields: brown ploughed soil DirtMediumType5 (texture TMDirt05a, checked in the game files) – CropsType1 was green and DirtMediumType1 grey; bare soil from the satellite is brown too
+- Less dark grass from the satellite (only really dark copses and hedges)
+- Insurgent bases: buildings stand wall to wall without gaps (doors facing out), palaces turned by 180°
+- Checkpoints: sandbags turned the right way – along the kerbs and across half of the road
+
+v0.50.5
+- Fields: a new texture CropsType1 (ploughed field with furrows, brown) instead of grey soil
+- Checkpoints: a sandbag barricade across half of the road (no longer along it), without objects the game lacks (the red cube)
+- Car parks: no more trees on car parks, and each one has a short access road to the nearest street
+
+v0.50.4
+- Car parks: the service lanes OSM draws across a car park are no longer built as roads – the car park is one asphalt area with the cars standing in rows side by side (~80 % of bays taken)
+
+v0.50.3
+- Insurgent bases no longer remove houses: they look for free ground right beside the town's houses (up to ~400 m from the original point) so they border on them; a free exit lane must lie in front of the barracks and war factory. When the whole block does not fit, every building finds its own free spot
+- A checkpoint's Stinger Site only where there is room (nothing is demolished)
+
+v0.50.2
+- Insurgent bases: they stand right next to the town's houses but not inside them – houses under the base buildings are removed; a free lane stays in front of the barracks and war factory so units can get out
+- Insurgent checkpoints in the streets: sandbags on both kerbs, a barricade half across the road (one lane stays open), a Stinger Site beside the road, crates and tyres, 3 guards (rebels + RPG)
+- OSM fields (farmland) are always brown ploughed soil, even when the satellite image is green
+
+v0.50.1
+- When the OpenStreetMap servers are overloaded, older downloaded data of the same area is used (if there is any) instead of an error
+
+v0.50.0 – ground from the satellite
+- Ground textures from the real colours of the Sentinel-2 satellite image (EOX s2maps.eu): green meadow, yellow / ripe field, brown ploughed field and soil, grey built-up ground, sand, dark green
+- Only the tiles over the map are downloaded (z15, ~10 m) and cached in ~/.cncearth/sat; without internet OSM is used as before
+- Forests, water, roads, buildings and steep slopes still follow OSM and the terrain
+- Source: Sentinel-2 cloudless – https://s2maps.eu by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2020), CC BY-NC-SA 4.0
+
+v0.49.8
+- Insurgent foot patrols march in squads of 6: 3 rows of 2 side by side, all start together on the same route and walk one behind the other as one unit (before: groups of 4 spread over the whole route)
+
+v0.49.7
+- The generator never changes the game file Data\INI\GameData.ini (road limit) by itself any more – a changed file stopped team mates from joining; maps are made for the game's original limit (4000 road segments, further streets only as ground texture)
+
+v0.49.6
+- Clearance + Zombie: zombies and insurgents are allies – they no longer fight each other, both go for the players
+
+v0.49.5
+- Clearance + Zombie: zombies no longer vanish by themselves after 4–5 minutes (on a long map they did not make it) and the next round starts only when you have killed all of the current one – no time limit
+
+v0.49.4
+- Clearance + Zombie: the Humvee shop appears at the start again (in multiplayer at every player) – before, its point was skipped in the northern zombie mode
+
+v0.49.3
+- Zombie Survival / Defense: no Supply Docks or oil derricks – money only for killed zombies
+- Zombie Survival: the first rounds bring zombies from all four sides of the map (16 points round the edge), not only top and bottom
+
+v0.49.2
+- Zombie Survival / Defense: the players' vehicles no longer stand in a big ring through the houses – at most 6 spots on free streets and squares near the centre, more players stand beside each other on the same spot; the buildings in the centre stay
+
+v0.49.1
+- Tall long blocks no longer from the narrow CivilianHighrise01: the same pieces as the low blocks (by entrances), stacked to the real height; square ones stay one CivilianHighrise02
+- Industry: added ToxinRepository, ChemicalFactory, PharmaceuticalFactory, VehicleHanger / StanHanger halls, an oil depot; IndustrialBuilding01 / 02 and warehouses stay
+- Trees in town: between the blocks of flats (the lawns round them) and along the streets; in Poltar ~330 more trees
+- Big cities: shopping centres (shop=mall or big shops) = AsianMegaHotel01 / AsianMegaMall01 / InternationalHotel01
+- Clearer editor: buildings coloured by type + legend, quick buttons for the marked ones (House, Low / Tall block, Hall, Industry, Garages, No building), the model and floors under the mouse
+
+v0.49.0 – greenery, car parks, paths to the entrances
+- Town greenery from OSM: parks get trees (~12 m apart) and bushes, lawns, gardens and scrub (landuse=grass, village_green, leisure=garden, natural=scrub) a few trees and bushes
+- Car parks: cars in rows like real bays (~2.6 m per car), some bays free, mixed cars
+- Paths to the entrances: from every entrance of a block of flats a footpath runs to the nearest street, on the side that faces the street; never through other buildings
+- OSM is downloaded again (new greenery data)
+
+v0.48.0 – building editor
+- Mark several buildings at once: drag = rectangle, Ctrl+click = add / remove; a type or floor change applies to all marked ones
+- New types: house (pitched roof), low block of flats (by entrances), tall block of flats (8 floors), hall / gym, industry / warehouse, office / school, shed
+- 2D preview: zoomed in, the game models' outlines are shown (blue dashed); for the selected building: models, real and in-game floors, flat / pitched roof and whether the model fits the footprint or sticks out
+
+v0.47.3
+- Blocks of flats without gaps: pieces overlap slightly (the models have empty margins), a continuous row is built even close to a road
+- ZBGIS laser: a clearer error line in the log (HTTP status / network error)
+
+v0.47.2
+- Slovakia: the real height of every building from the UGKK laser scan (ZBGIS, DSM 1.0 − DTM 5.0) – automatic, only the tiles over the map are downloaded, the result is cached; height → floors
+- A block of flats = one continuous building: one model repeated in a straight row, touching, no gaps or offsets
+  up to 6 floors: odd number of entrances = that many AsiaApartment02, even = half as many AsianApartmentSingle01
+  7+ floors: long = CivilianHighrise01 side by side, square = one CivilianHighrise02
+
+v0.47.1
+- Low blocks by their number of entrances (~12.5 m each): an even count = AsianApartmentSingle01 only (two entrances), an odd count = AsianApartmentSingle01 + one AsiaApartment02 (one entrance) at the end
+
+v0.47.0
+- Blocks of flats without a floor count in OSM: short point blocks (up to ~22 m, e.g. Sklarska Z / H / G / F) = an 8-floor tower → one CivilianHighrise02; longer blocks = 5 floors
+- Low blocks are no longer uniform: long ones (from ~30 m) = AsianApartmentSingle01 (two entrances), short ones = AsiaApartment02 (one entrance)
+- Checked on the real Poltar OSM data
+
+v0.46.6 – checked on the real Poltar data
+- Blocks of flats without a floor count in OSM (the whole of Sklarska street too) = 5 floors → low AsianApartmentSingle01; an old saved setting of 8 floors is no longer used (option removed)
+- Garages: rows are formed only from garages standing side by side in one row (before, a whole garage site merged into a few giant "rows" that did not fit) – in Poltar 63 rows, 165 garages
+- Sports hall (building=sports_hall) = SupplyWarehouse
+
+v0.46.5
+- Garages are generated again: the MogadishuGarage model is deeper than a real garage, so it may reach over the driveway – before, the whole row was left out
+
+v0.46.4
+- Fix: Poltar was taken for a dense big city (many small buildings) and 5-floor blocks got 10-floor pieces. A big city is now recognised by how much of the map is built up (Vienna yes, Poltar no), and even there a house never gets a piece much taller than in reality
+- Sports halls (building=sports_hall, sports centre grounds) = a low hall instead of a block of flats
+- Football pitches have no stadium stands any more, just the goals
+
+v0.46.3
+- Blocks of flats by floors and shape: up to 6 floors one entrance = AsiaApartment02, long blocks mainly AsianApartmentSingle01 (two entrances); 7+ floors long = CivilianHighrise01, 7+ floors square (also slightly oblong) = one CivilianHighrise02
+- Garages stand in rows side by side like in reality (neighbouring OSM garages are joined into a row)
+- Zombie Survival / Defense: the town centre is no longer empty – only small spots under the vehicles (and the silo) stay free
+
+v0.46.2 – a more faithful Poltar
+- Tall blocks with a square footprint ("cubes") = one CivilianHighrise02; long rectangular ones stay CivilianHighrise01
+- Garages = MogadishuGarage (also a single small garage, no longer a Shack)
+- Hospital / polyclinic (amenity=hospital / clinic, healthcare) = TechHospital, one per site
+- Industrial zones (also man_made=works sites, e.g. glassworks) = halls and plant: IndustrialBuilding, SovietRadioBuilding, OilRefinery, TechOilRefinery, StanOilTank, warehouses – no longer blocks of flats
+- Railways like the real thing: one straight main line (the 2nd track of a double line is merged), side tracks and sidings join it; crossovers and tracks lying on top of each other in a station are gone
+- Farm buildings (cowsheds, stables, big barns of a cooperative) = big halls
+- OSM is downloaded again for these changes (new cache)
+
+v0.46.1
+- Zombie Survival / Defense: the town centre where the players' vehicles appear (Defense: the silo) is kept free – in a dense city the vehicles no longer appear inside houses
+- Clearance: insurgents are always spread over the whole town, not packed into one district
+- Dense big cities (900+ buildings per km², e.g. Vienna): many more kinds of buildings by height, every house different; Poltar and smaller towns stay as they were
+
+v0.46.0 – BIG UPDATE for GeneralsX
+- The generator is built for GeneralsX (64-bit) only: no classic game switch, no LIGHT or Medium detail
+- Always a full map: civilians, parked cars, tractors and animals, sounds, bushes and willows, sheds, fences, footpaths, train, lamps, parking-lot cars, playgrounds and cemeteries, stacked buildings, AI paths, every house from OSM
+- Unlimited roads – the GeneralsX limit is raised by itself at start, the road limit buttons are gone
+- Up to 32 players, area up to 5 × 5 km also for the Zombie modes
+- Old LIGHT settings (fewer trees, details off) are reset to full at start
+- Maps are saved only to Documents\GeneralsX\GeneralsZH\Maps
+- A GeneralsOnline (lite) version will come separately later
+
+v0.45.7
+- Manual starts work on rectangular maps too (it used to say 'click at least 2 starts inside the red square')
+
+v0.45.6
+- The target game switch sets everything with one click:
+  GeneralsX – finds the GeneralsX folder, raises the road limit by itself (unlimited), full detail, 32 players, area up to 5 × 5 km, maps to Documents\GeneralsX
+  Classic – LIGHT, 8 players, area max. 2.5 × 2.5 km, 4000 roads, maps to the classic game folder, nothing is written into the game
+- The GeneralsX auto setup also runs when the program starts
+
+v0.45.5
+- The GeneralsX folder is found automatically even when an empty or wrong one was saved in the settings (the 'no generalszh.exe' error)
+
+v0.45.4
+- The English version is fully English: map shape, building style, mode descriptions, generation and satellite-building log lines
+
+v0.45.3
+- Area up to 5 × 5 km without the experimental switch (Zombie modes still 2 × 2 km, 5 × 5 km with 'Big Zombie maps')
+- GeneralsX: unlimited roads – the GameData.ini limit is raised automatically (200,000) and roads are no longer trimmed
+
+v0.45.2
+- The map is saved for the target game: GeneralsX → Documents\GeneralsX\GeneralsZH\Maps, classic → Documents\Command and Conquer Generals Zero Hour Data\Maps (Export has a field for each)
+
+v0.45.1
+- Zombie Defense: captured silo no longer uses power (no 'low power')
+
+v0.45.0
+- Map shape: square or north–south rectangle 1:2 / 1:3 / 1:4 (Area → Shape)
+- Clearance: automatic start at the bottom (south), push north through the town
+- Clearance: insurgents' main base at the top (north) – destroying it wins; town buildings stay occupied
+- Clearance + Zombie: zombies come from the north (insurgents' base)
+- Rebel foot patrols (groups of 4), adjustable 0–200 (LIGHT max 50)
+
+v0.44.1  -  Satellite buildings only for your area
+* Satellite buildings are fetched only for the map's area: from one world file (Google + Microsoft + OSM, VIDA /
+  source.coop, PMTiles format) only the tiles over the map are read - usually 1 - 10 MB.
+* Fallback if that fails: the Microsoft tile (at most 100 MB); the program keeps only your area and deletes the big file
+  at once. The result for the area is saved (a few hundred kB), the next run downloads nothing.
+
+v0.44.0  -  Buildings from satellite images, smooth roundabouts, simpler terrain
+* NEW: when OpenStreetMap has fewer than 30 buildings in the area (Iraq, many places in Africa and Asia), the program
+  adds buildings from satellite images automatically (Microsoft Global ML Building Footprints). Only the needed tile is
+  downloaded and kept in ~/.cncearth/msbuildings, so the next run needs no download.
+* NEW: roundabouts are a smooth circle of one radius (from OSM junction=roundabout), big enough for the road, and every
+  entry joins exactly onto the circle - no more "star of planks".
+* The terrain is always real, from elevation data (hills 1:1) - the terrain settings are gone.
+* The map name is on the Export page.
+* Target game GeneralsX: if the road limit in GeneralsX is not raised yet, the program raises it while generating (only
+  in the GeneralsX folder) - full detail with footpaths and every street.
+* The summary above the button also shows the target game, detail, road limit and what goes on the map.
+* ZombieSurvival Defense has its own starting money (default 5000), Survival keeps its own.
+
+v0.43.0  -  ZombieSurvival rebuilt after wheel of death
+* FIX: empty seats kept their cars (up to 31 abandoned cars) and players kept all 3 cars. Now exactly as in
+  "[zombies] wheel of death": every lobby seat with a faction gets the money, the kill bounty and the airdrop and keeps
+  only its faction's car (USA Humvee, China Troop Crawler, GLA Battle Bus); an empty seat (no faction) loses all its cars
+  at once. None of this waits for the zombie AI any more.
+* The zombie AI shows itself: its side creates a marker zombie at the start (like every spawn), and its owner - or the
+  owner of zombies no person can build - is the zombie AI (its car goes away).
+* NEW: falling MiGs as in wheel of death - from round 6 a MiG flies over the town every 8 - 16 s, is shot down after
+  6 - 11 s and 3 burning zombies jump out of the wreck (at most 40 at a time). 4 routes over the town centre.
+
+v0.42.1  -  Zombie modes up to 5 x 5 km
+* With "Experimental huge maps" on (Area -> Advanced), Zombie, ZombieSurvival and Defense go up to 2000 x 2000 tiles
+  (5 x 5 km at 1:1). Without it the limit stays 2 x 2 km.
+
+v0.42.0  -  Clearer settings, buildings by country
+* NEW: "Target game" at the top of Game modes: GeneralsX (full map, up to 32 players, road limit from GeneralsX) or
+  Classic / GeneralsOnline (LIGHT, max. 8 players, roads within 4000).
+* NEW: "Map detail: Full / Medium / LIGHT" - one setting instead of a dozen boxes (they stay on the Landscape and Town
+  pages for fine-tuning). LIGHT is no longer a box under Export.
+* NEW: building style by the map's location (Town -> Building style): Europe, Middle East and Africa (mud houses,
+  mosques, bazaars), Asia; or by hand. The Americas and Australia use the European set for now.
+* Zombie is one card with a Classic / Survival / Defense choice and an "add a GLA AI" reminder.
+* Clearance description fixed (no objectives). "How to play" updated.
+* Max. insurgents: a 0 - 5000 slider.
+* The road limit is raised only in the GeneralsX folder (new field Export -> Folders -> GeneralsX), never in the Steam game.
+
+v0.41.0  -  Up to 32 players (GeneralsX 0.9.70)
+* NEW: up to 32 players, as GeneralsX 0.9.70 supports (Players -> player count 1 - 32, up to 32 hand-placed starts).
+  With 13+ players: an outer ring of starts along the edges and an inner one round the town, smaller bases so they fit.
+* Every mode (Clearance, Zombie, ZombieSurvival, Defense, insurgents) handles players player0 - player31.
+  ZombieSurvival/Defense: vehicles and respawn for everybody (at least 8 as before), starts in 2 rows in the border.
+* The insurgents' own start number is 32 (was 12) - no clash with players 13+.
+* The player count can be 1 (Clearance / Zombie for one player).
+
+v0.40.1  -  FIX: ZombieSurvival did not start
+* FIX: v0.40.0 looked for the zombie AI with "<This Player>", which did not work in the game - nobody got their money
+  or the kill bounty and the other factions' cars stayed. Now a "marker" zombie appears on a zombie team in the black
+  border at the start; its owner is the zombie AI (its cars and the marker go away). The people then get their money,
+  the bounty and only their faction's car, whatever their start.
+
+v0.40.0  -  ZombieSurvival: the start does not matter
+* FIX (ZombieSurvival / Defense): the zombie AI is no longer told apart by the bottom start - it reports itself (its
+  scripts run as the GLA AI). Anybody can have any start - a person on the bottom start gets a vehicle, money and the
+  respawn too. The zombie AI deletes its own vehicle.
+* Without a GLA AI (the zombie master) in the lobby the game shows a warning after 15 seconds that one must be added.
+
+v0.39.0  -  LIGHT version for the classic game
+* NEW: Export -> "LIGHT version for the classic game (GeneralsOnline)". For the original 32-bit Zero Hour, which handles
+  less than GeneralsX: at most 2500 trees, no fences, lamps, parked cars, traffic, footpaths or details, fewer civilians
+  and insurgents (max. 2 per house), roads always within the game limit (4000 segments). Test 4x4 km: 8201 -> 3192
+  objects. Adds [LIGHT] to the map name.
+
+v0.38.1  -  Clearance simplified
+* Clearance is simpler: just the insurgents in the buildings and the "Insurgents left" counter. The objectives (town hall,
+  church, arms depot) are off - the map has fewer objects and scripts.
+
+v0.38.0  -  Clearance and Zombie for several players
+* FIX: Clearance and classic Zombie always gave only 2 starts (you in the middle + an AI in a corner) and ignored the
+  player count and hand-placed starts. Now with 2 or more players your layout and count are used. The insurgents need
+  no start (they are their own side), as before.
+* One extra start in the farthest corner for an AI: in Zombie the zombie AI (GLA), in Clearance a "dormant" AI so the
+  game does not end in victory at once. In the lobby add the AI after the human players.
+* The insurgents and their quick reaction forces go after every player, the objectives (town hall, church, depot) can be
+  done by anybody and every player gets the reward. Zombie: every player gets a shop Humvee at their start.
+* 1 player: unchanged (town centre + dormant AI).
+
+v0.37.2  -  FIX: the host's game froze
+* FIX (ZombieSurvival / Defense, multiplayer): in v0.37.1 the game of whoever created the server froze. The
+  per-player camera ("<Local Player>") is gone. At the start everybody's camera goes to the same place - the
+  vehicles in the town (Defense: the silo) - as "[zombies] wheel of death" does.
+
+v0.37.1  -  ZombieSurvival: the camera goes to your vehicle
+* FIX (ZombieSurvival / Defense, multiplayer): at the start the camera showed a black screen, because the start is
+  outside the playable area. Now every player's camera moves to their own vehicle on their own computer
+  (Humvee / Troop Crawler / Battle Bus). Only the view changes, so the game does not go out of sync.
+
+v0.37.0  -  Compact map
+* NEW: Export -> "Compact map (compressed)" (on). The map is saved compressed the same way as the game's official
+  maps (RefPack "EAR") - about 10x smaller (test: 3.8 MB -> 0.34 MB) with nothing missing. The game unpacks it when
+  loading. A smaller map is sent to team mates in the lobby faster.
+* The program (and the editor) can read compressed maps too.
+
+v0.36.0  -  Defense: a captured silo is yours, zombies faithful to wheel of death
+* FIX (Defense): capturing the silo destroyed it and the game ended in defeat. Now the silo stays with whoever
+  captures it and its nuke is theirs - no power needed. You lose only when the silo is really destroyed.
+* The silo slowly repairs itself (10 HP/s) when nothing hits it for 8 seconds.
+* Defense: zombies go for the silo first, but attack a player within ~100 m of them. Near the silo they go for it.
+* ZOMBIES faithful to "[zombies] wheel of death" v5-6: speeds 25 / 32 / 36 / 40, a burning zombie (300 HP, shockwave
+  on death), a fast GC zombie (87), a 3000 HP boss with armour (explosions do nothing) and a knife.
+  Costs (kill bounty) 200 / 600 / 1000 / 1500 / 1800 / 3500.
+* Zombies upgrade as in the original: the first Chem zombie brings armour (+30 HP for the small ones), the first GC
+  zombie faster legs.
+* New wave mix: Chem and burning zombies from round 10, GC from 13, the boss from 16 - normal zombies stay the majority.
+
+v0.35.0  -  ZombieSurvival Defense, zombies as in wheel of death, spread-out waves
+* NEW MODE ZombieSurvival Defense: a Chinese nuclear silo stands in the town centre. Zombies go for it from random sides
+  (the side changes zombie by zombie). If they destroy it, it blows up, radiation stays and you have lost. Repair:
+  capture the silo with infantry - it is replaced by a new one at full health. Otherwise like ZombieSurvival (shop by
+  faction, money per kill, airdrop respawn - in Defense always, even when nobody is alive).
+* ZOMBIES as in "[zombies] wheel of death": they see the whole map, climb cliffs, blow up only when they reach you (not
+  when shot), 5 types: speed 25 / 32 / 36 / 40, 120 - 200 HP, a 600 HP boss with a one-hit knife. They live 4 - 5 min.
+* SPREAD-OUT WAVES: zombies come in a stream, 2 per second, each from a different point. First 5 rounds from 5 points
+  along the whole top edge and 5 along the bottom edge, then from a ring round the town.
+
+v0.34.0  -  ZombieSurvival: a shop for every faction, no dozer, zombies from top and bottom
+* Shop vehicle by faction (as in wheel of death: all three are in the map, a script keeps yours): USA = Humvee,
+  China = Troop Crawler, GLA = Battle Bus. They carry 6 soldiers who all fire from inside.
+* Fair line-up: every faction has Pathfinder (sniper), Jarmen Kell, Mini-Gunner and Col. Burton + its own basic and
+  anti-tank soldier (Ranger/Missile Defender, Red Guard/Tank Hunter, Rebel/RPG). Page 2: the faction's upgrades
+  (armour, repair, + 3 of its own).
+* No dozer or workers at the start (the command center stays off the map).
+* First 5 rounds: half the zombies from the top and half from the bottom, from the middle of the map edge; then from a ring
+  round the town.
+
+v0.33.4  -  Layout "Zombie Survival (automatic)"
+* Players page, Layout: new option "Zombie Survival (automatic)". Switching ZombieSurvival on selects it by itself and no
+  starts need clicking on the map (manual starts are not used). Switching it off goes back to automatic.
+
+v0.33.3  -  ZombieSurvival: base off the map, zombies fast and close, living-zombie counter
+* ZombieSurvival: the starts are OUTSIDE the playable area, in the black border of the map (as in wheel of death) - the
+  command center and dozer appear there but you cannot see or reach them. You fight only with the Humvee in the town.
+  The corner "pen" is gone.
+* Zombies (Zombie and ZombieSurvival): the first 5 rounds come from one point a short way north of the fight (~225 m), so
+  they arrive quickly; from round 6 from a ring round the town. First wave after 10 s by default.
+* New counter "Zombies left:" - how many zombies are alive on the map (exact up to 30, then in steps).
+
+v0.33.2  -  ZombieSurvival redone exactly like "[zombies] wheel of death"
+* The command center is NOT deleted any more. People's starts are in a closed "pen" in a map corner (a sunken block of
+  terrain with cliff edges - nothing walks in or out). The center keeps you in the game and pays the kill bounty.
+* The Humvees are placed in the map in the town centre for players 0-7 (as in wheel of death); a script deletes the ones
+  of empty slots and of the zombie AI.
+* "Down" = no unit of yours in the town (outside the pen) - then the respawn runs; nobody has anything in the town =
+  game over.
+* Layout: starts 1..N = people in the pen, the last start = zombie AI in the opposite corner.
+
+v0.33.1  -  ZombieSurvival fix, custom zombie settings
+* FIX ZombieSurvival: right after the command center vanished the game said "defeated". The script handed the hidden
+  helper building to the player first and only then deleted the starting base - and the game deletes everything that
+  is in the player's team at that moment, the helper too. Now the base goes first. Game over can also only trigger once
+  the player has really got the Humvee.
+* GAME MODES - custom settings: a "Zombies" card (zombies in wave 1, more per wave, first wave after, break between
+  waves, growing zombies in classic Zombie too), a "ZombieSurvival" card (starting money, respawn after, money per kill
+  in %) and a button to the insurgent settings. Easy / Medium / Hell set these values too, so you see what a preset did.
+* CLASSIC ZOMBIE: option "Growing zombies" - the same tiers and mix as ZombieSurvival, without money per kill.
+
+v0.33.0  -  New game mode ZombieSurvival
+* ZOMBIESURVIVAL (new card in Game modes, on the principle of "[zombies] wheel of death"):
+  - no base: the command center and dozer disappear, everybody gets a shop Humvee and $2000,
+  - no insurgents in the town (all insurgent options are ignored), zombies are the only enemy,
+  - money for every zombie killed (10 % of its cost): normal $20, bigger $30, strong $45, heavy $70, boss $200,
+  - zombies grow with the waves - bigger, faster, more HP - but normal ones stay the majority even late
+    (wave 15+: 40 % normal, 25 % bigger, 20 % strong, 12 % heavy, 3 % bosses),
+  - Humvee lost: if a team mate still lives, after 60 s an airdrop appears in the left side bar - click where you want
+    it and a plane drops a new Humvee. Upgrades stay. When nobody has a Humvee any more, the game is over.
+  - Setup: people on the starts in the centre, 1 GLA AI on the LAST start (corner). Number of players = people + 1.
+  - Cannot be combined with Clearance or Zombie (switching it on turns them off). Map at most 2 x 2 km.
+  - Map name: "[ZOMBIE SURVIVAL] Poltar".
+
+v0.32.2  -  Game mode in the map name
+* Maps with a game mode get it in square brackets at the start of the name (like "[zombies] wheel of death"):
+  "[ZOMBIE] Poltar", "[CLEARANCE] Poltar", "[CLEARANCE+ZOMBIE] Poltar" - easy to spot in the game's map list.
+* Editor choices (buildings, bases) belong to the place whatever the mode - "[ZOMBIE] Poltar" uses the same ones as
+  "Poltar".
+
+v0.32.1  -  New logo: globe + ZERO HOUR EARTH
+* Header logo: a globe (Europe and Africa, with ocean, light and atmosphere) and a chrome-style ZERO HOUR + glowing orange
+  EARTH. The window and .exe icon is now the same globe.
+* Logo and icon can be redrawn with the scripts in the tools folder (make_logo.py, globe.py).
+
+v0.32.0  -  Sharp window on 4K, new logo
+* SHARP ON 4K / HIGH-DPI: the app tells Windows it is DPI-aware, so it is no longer blown up and blurry. Fonts, window,
+  sliders, the map and the preview scale with the monitor's DPI.
+* NEW LOGO: a globe-in-a-gun-sight emblem (drawn at full resolution, sharp at every size), "ZERO HOUR" + orange "EARTH",
+  subtitle and version below. The same emblem is the window and .exe icon.
+* An orange line under the header, cards with an orange bar next to their titles.
+
+v0.31.2  -  Zombie: next wave only after a clear, smaller maps
+* ZOMBIE: the next wave comes only when every zombie of the previous one is destroyed. Then a "Wave cleared!" message and
+  a 15 s break. (Safety net: if a zombie gets stuck somewhere, the next wave comes after 5 minutes at the latest.)
+* ZOMBIE: smaller maps only - at most 800 x 800 tiles (2 x 2 km at 1:1). With Zombie mode on, the area size is limited
+  automatically.
+
+v0.31.1  -  Fix: crash on big maps with game modes
+* FIX: "attempt to get argmin of an empty sequence" with Clearance / Zombie on a big map (e.g. 5 x 5 km): the start of the
+  dormant AI in the map corner searched for a spot outside the map.
+
+v0.31.0  -  New, clearer window
+* Menu with icons on the left instead of tabs: Game modes, Area, Players, Landscape, Town, Enemy, Export, Preview.
+* Game modes as big cards (Clearance / Zombie / Black map) - click to switch on/off, an active one glows orange.
+  Difficulty as 4 buttons (Custom / Easy / Medium / Hell) and a short "How to play".
+* Every page is split into cards. Rarely used options are folded under "▸ Advanced" (click to open).
+* Long explanations moved into ⓘ marks - they show when you hover.
+* Above the GENERATE button a summary: name • size • players • modes • difficulty.
+* Below it a line with the current generation step; the full log opens with "Log ▸".
+
+v0.30.0  -  Objectives, insurgent reinforcements, difficulty presets, Humvee upgrades, denser forests
+* CLEARANCE - OBJECTIVES: free the town hall (largest public building), free the church, destroy the arms depot. They
+  are revealed on the map at the start and guarded. Each one: $5000 + reinforcements (Rangers, Humvee, tanks). On-screen
+  counter "Objectives done". "Free" is done when no armed insurgent is left around it and a unit of yours stands there.
+* INSURGENTS SEND REINFORCEMENTS: the town is cut into districts; every district with insurgents has a reaction force
+  (technicals, RPG, rebels) that comes for you when you enter it or get close. Option on the Enemy tab.
+* ONE-CLICK DIFFICULTY (GAME MODES): Easy / Medium / Hell sets insurgent numbers, production, waves, patrols, oil
+  derricks and the size and pace of zombie rounds. "Custom" keeps your own settings.
+* ZOMBIE - HUMVEE UPGRADES: button 13 switches to a second page: armour (+800 Humvee, +60 infantry), self-repair, TOW
+  missiles, advanced training, Ranger flash-bangs, building capture. Button 13 goes back.
+* DENSER FORESTS: trees inside a forest gather in thick groves instead of a thin even spread, so the same number of
+  trees reads as dense forest.
+* TERRAIN: elevation is downloaded one level finer (up to zoom 15) - truer slopes and valleys. Note: the source data in
+  Europe is ~30 m, so the gain is modest.
+
+v0.29.1  -  Black map
+* New option "Black map" in GAME MODES (on by default): at the start the whole map and minimap are black and open up only
+  where your units can see. The border outside the playable area is black too. Works for every map, not only
+  Clearance and Zombie.
+
+v0.29.0  -  Clearance counter, fortress with free exits, more zombies
+* CLEARANCE: on-screen counter "Insurgents left" - how many insurgents can still fight (soldiers, also those in houses,
+  vehicles, defences). Exact up to 20, then in steps of 5 / 25 / 100.
+* FORTRESS: War Factory (Arms Dealer) and barracks side by side in the front row with a tank alley, doors to the map
+  centre. The other buildings stand in the back row back to back with them, doors outwards. No exit is blocked.
+  Defences are glued to the building corners.
+* ZOMBIE: more zombies from the start (round 1: 12, then +6 per round, extra every 5th round).
+
+v0.28.2  -  Zombie: shop Humvee
+* In Zombie mode you get a shop Humvee at the start (like in "[zombies] wheel of death"): it trains infantry inside
+  itself - Ranger, Missile Defender, Pathfinder (sniper), Col. Burton, Red Guard, Tank Hunter, Jarmen Kell - with no
+  barracks. It carries 6 soldiers who can fire from it.
+* A map.ini is saved next to the map (Zombie mode only) that turns the Humvee into this shop.
+
+v0.28.1  -  Zombie mode redone, on the principle of "[zombies] wheel of death"
+* The Zombie mode now works like the proven map "[zombies] wheel of death": the zombies are run by a GLA AI from the
+  lobby (the map gives it its own scripts and teams of the SkirmishGLA side), not by the insurgents.
+* Rounds: round 1 starts after 1 minute, then every ~45 s (getting faster), each with more zombies. Toxin terrorists from
+  round 3, bomb trucks every 5th round. Zombies come from 6 points along the map edges and re-target every 3 seconds.
+* On-screen counters "Round" and "Zombies this round" (map.str next to the map).
+* How to play Zombie: start 1 for you + 1 GLA AI (any GLA general) - it runs the zombies. Clearance: start 1 + any 1 AI
+  (it stays neutral). Both modes at once: a GLA AI.
+
+v0.28.0  -  Game modes: Clearance and Zombie
+* New GAME MODES box at the top of the window. Tick one, both or none - it applies to the map you generate. Everything
+  is in the map's scripts: nothing to install, online play stays fine.
+* CLEARANCE: you start in the middle of the town, the map is black and opens up where you go. Insurgents are all over
+  the town, with bases, production and attack waves. Destroy every insurgent and you win (the game's victory screen).
+* ZOMBIE: nests (barracks) near the edges of the town. After a quiet start (3 min) hordes of GLA Terrorists run out of
+  them, hunt your base and blow up. Every 5 minutes a stronger wave tier joins. Destroy the nests to stop them.
+* How to play: in Skirmish take start 1 and add one AI (any). The map makes it neutral and broke at once - it only keeps
+  the game running, because the game would declare a lone player the winner immediately.
+* With GeneralsX installed, maps are saved to Documents\GeneralsX\GeneralsZH\Maps by default.
+
+v0.27.1  -  AI builds again, fortress with alleys
+* AI FIX: the computer refuses to build where an enemy object stands. With the insurgents spread over the whole town
+  again, garrisoned houses could be near a start and the AI built nothing. Now no insurgent is closer than 1600 units
+  (~400 m) to a start, whatever the base size.
+* The tree-free centre of a start base is bigger (330 units), so the AI has room for its first buildings.
+* Fortress: buildings stand side by side in a block with a tank-wide alley (~14 m) between them.
+* Fortress defences are glued to the building corners (block corners first, then corners next to the alleys), so they
+  never block the alleys.
+
+v0.27.0  -  Oil derricks, dense fortress, forest stays in the base
+* Oil derricks (TechOilDerrick) where the insurgents are: around their bases (or in their area). Whoever captures them
+  earns money. The number is set on the Enemies tab (0 = none).
+* Smaller start base: the base size slider now goes from 200 to 1600 (default 600), so fewer town buildings disappear.
+* Trees inside a start base stay. Only the small centre where the command center stands is cleared. Buildings and
+  roads are still removed from the base.
+* By default the insurgents are spread over the whole town again (like before). The new check box "Insurgents in one
+  place" gathers them into one compact area (or the area you draw in the editor).
+* The main insurgent base is really dense: its buildings stand wall to wall, touching each other, and higher levels add
+  more of them (arms dealer, palace, supply stash ...). Defences surround the whole block.
+
+v0.26.2  -  Side streets are not grass
+* Streets that do not fit into the game's road limit are at least painted on the ground as asphalt (pavement, dirt by
+  surface), so the town shows all its streets instead of grass. Main streets are always real roads. Nothing is placed
+  on the painted streets either (buildings, trees, units).
+
+v0.26.1  -  Real buildings come first
+* Insurgent bases and the fortress are built after the town's buildings, so no real house disappears because of them.
+  They look for a free spot first, otherwise their buildings may overlap houses (never roads, water or player bases).
+
+v0.26.0  -  AI attacks, the Danube at real width, insurgent attack waves
+* AI FIX: the skirmish AI scripts look up areas around the bases (InnerPerimeter1, OuterPerimeter1 ...). The maps had
+  none, so the AI only built and never attacked. Every start now has an inner and outer perimeter (insurgents: 13).
+* FIX: rivers at their real width. The width is measured at every point to the OSM banks (also when cut by the map
+  edge), otherwise from the width tag. The Danube is ~300 m instead of 14 m. Old waterway=riverbank areas are read.
+* Bridges up to 1.1 km, so roads over the Danube get a full bridge.
+* NEW: insurgent attack waves. When 5 tanks (set in the Enemy tab) stand at a base, the whole group of tanks and
+  infantry of that base goes for the players. 0 = they only defend.
+* Big towns: big flat-roofed buildings are no longer a grid of small cubes: department store = GreekShop, long office
+  = SovietRadioBuilding, tall office = CivilianHighrise02, deep city block = bigger pieces. Halls (warehouses) only
+  for supermarkets and shopping centres.
+* The first generation downloads the area from OSM again.
+
+v0.25.0  -  Big towns: road limit, no building limit
+* NEW: "Raise the road limit in the game" button (Export tab). The game draws only 4000 road segments, so big towns
+  (e.g. Bratislava 5x5 km) were missing streets and only a blocky texture was left. The button writes
+  Data\INI\GameData.ini with a limit of 40,000 into the game folder (the way mods do). Restart the game.
+  "Restore original" removes it (a mod's own GameData.ini is backed up and restored). The generator reads the limit
+  and writes all streets accordingly.
+  Note: an online game with players without the raised limit reports a mismatch. Skirmish against the AI is fine.
+* Buildings are no longer capped (it used to be 7000 pieces).
+* The default insurgent cap is 4000 (packed into the insurgent area).
+
+v0.24.0  -  Missing streets
+* FIX: the game draws at most 4000 road segments (MaxRoadSegments in GameData.ini) and silently skips every road
+  after that. On bigger maps the program wrote more, so some streets were missing in the game. The program now
+  counts segments the way the game does (bends and junctions too), stays below the limit and leaves out footpaths
+  and dirt tracks first, never streets. The log tells you when something did not fit.
+* FIX: slip roads and connectors (primary_link, secondary_link, tertiary_link ...) and "road" / "busway" ways are
+  downloaded too. They were missing completely.
+* FIX: alleys (service=alley) and longer driveways (service=driveway, 30 m+), e.g. the asphalt lanes between blocks
+  of flats, are no longer thrown away.
+* Gentler duplicate-road filter: short streets at junctions no longer disappear.
+* NEW: "Footpaths between blocks of flats and through parks" switch in the Town tab (turn it off on big maps to
+  leave more segments for streets).
+* The first generation downloads the area from OSM again.
+
+v0.23.2  -  Source code for sharing
+* The zip made by build_exe.bat contains a "source" folder with the full source code next to the .exe.
+* NEW: DEVELOPERS.txt: how to run from source, what each file does, how the map format, AI paths, insurgent
+  scripts and the train work, where data is stored and how to add models or OSM features.
+* selftest.py works on any PC: python selftest.py "path to the game".
+
+v0.23.1  -  Clean template for sharing
+* The bundled map template (template.map) is new and clean: flat terrain, one grass texture, no objects from
+  another map. Generated maps are exactly the same as before.
+
+v0.23.0  -  Insurgent area, unit production
+* NEW: INSURGENT AREA. In the editor ("Insurgent area" mode) draw a circle: click the centre and drag. Several
+  circles are possible, right click deletes one. Garrisoned insurgents, patrols, their bases and the fortress
+  stay inside the drawn area.
+  Without a drawn area the program picks a compact area (250-600 m) in the centre of the biggest town, away from
+  the player bases. Before, the insurgents were spread over the whole map.
+* NEW: insurgent bases are compact and have only a War Factory and Barracks (+ defences and units).
+  - The War Factory builds tanks, the Barracks infantry. By default each building makes 1 unit every 2 minutes,
+    so 1 unit per minute per base in total. Set it in the Enemy tab (0 = no production).
+  - Destroy the building and its production stops.
+* Removed the "Open in World Builder" button (World Builder cannot handle these maps).
+* English is the default language for new users.
+
+v0.22.0  -  Map editor, blocks of flats by height, World Builder
+* NEW: MAP EDITOR (Preview tab -> "Edit buildings and insurgent bases").
+  - Click a building and pick what it is: square block, long block with balconies, 5-7 floor block, high-rise,
+    flat-roofed shop, family house, garages or no building. Set the number of floors too.
+  - Base mode: click to add an insurgent base (right click deletes) and set its buildings, defence towers,
+    infantry and vehicles.
+  - "Regenerate with changes" builds the map again. Changes are saved with the map name and used every time the
+    same map is generated again.
+  - Wheel = zoom, right button + drag = move.
+* NEW: "Open in World Builder" button after generation (looks for WorldBuilder.exe in the game folder).
+* Blocks of flats follow the real OSM height (4 floors when unknown):
+  - up to 4 floors: square footprint = one AsiaApartment02, elongated = AsianApartmentSingle01,
+  - 5-7 floors: AsianApartment01,
+  - 8+: CivilianHighrise01.
+  A square block is never built from long blocks any more.
+* FIX: automatic insurgent bases no longer sit on top of the blocks of flats (they used to clear them away).
+  They are built next to the town on open ground.
+
+v0.21.0  -  Train, garages, footpaths, silos
+* NEW: a running train. It runs along the longest railway on the map and back, stops at the OSM stations and
+  stays level over river bridges. Switch in the Town tab (on by default).
+* NEW: rows of garages (building=garages / garage and buildings in garage areas) are built from MogadishuGarage
+  following the real length of the row.
+* NEW: footpaths between blocks of flats and through parks (OSM footway, cycleway) as a narrow pavement.
+  Pavements mapped along a street and crossings are skipped. Footpaths do not push buildings away.
+* NEW: farm cooperative silos (building=silo, man_made=silo): a group of silos = one OilRefinery.
+* Railway stations (building=train_station) are plain flat-roofed buildings, not blocks of flats.
+* The first generation downloads the area from OSM again (footpaths, stations and silos added).
+
+v0.20.0  -  Buildings follow the real shape, AI attacks, new blocks of flats
+BUILDINGS
+* NEW: buildings follow the real OSM footprint. L, U, H shapes and buildings with courtyards have the same
+  shape in the game as in reality (pieces may overlap).
+* NEW blocks of flats: long blocks = row of AsianApartmentSingle01, ordinary = AsianApartment01 side by side,
+  small square = AsiaApartment02, high-rise (9+ floors) = row of CivilianHighrise01.
+  Only AsiaApartment02 and AsianApartmentSingle01 are stacked.
+* Removed: white ornate EuroHighrise2, stone SovietGovernmentBuildingSmall, StanSovietOffice.
+* Shops, banks, post offices, offices and flat-roofed buildings: AsianApartmentUnit instead of half-timbered
+  houses. GermanPub only for pubs with a pitched roof.
+* Schools and other large public buildings are built from panel pieces following their shape.
+* NEW: buildings mapped as multipolygons in OSM (large schools, factories, courtyard buildings) are loaded.
+  They were missing completely before.
+* Big shops over 900 m2 (supermarkets) are halls.
+
+AI AND ENEMIES
+* FIX: the AI built a huge army and never attacked. When the AI picked the insurgents as its target it looked
+  for an attack path that did not exist. The insurgents now have their own start number and attack paths
+  lead to them from every base.
+* AI attack paths lead to every player's base from every other base (not only from the farthest one).
+* FIX: the insurgent fortress is never built on a player start, always as far from all players as possible.
+  The "Position" option is gone.
+* Garrisoned insurgents stay further from the bases so they do not shoot the AI dozer at the start (likely
+  why some AIs did not build at all).
+
+PITCHES
+* FIX: football goals stand opposite each other at the ends of the pitch, facing each other.
+* Artificial turf, multi-use and multi-sport pitches count as football pitches too.
+
+* The first generation downloads the area from OSM again (multipolygon buildings added).
+
+v0.19.0  -  Road surface from OSM, only the panel blocks are stacked
+* Only the two main panel blocks are stacked into taller buildings: the square tower block (EuroHighrise2)
+  and the long block with balconies (StanSovietOffice01/02). Town halls, shops etc. are no longer stacked.
+* NEW: road surface from OSM (surface tag):
+  - asphalt / concrete -> asphalt road (also tracks and paths mapped as asphalt),
+  - gravel -> gravel road, dirt / unpaved -> dirt road,
+  - paving stones / sett -> cobblestone street, paved footpath -> pavement,
+  - pedestrian streets are now drawn too (wide pavement).
+  Streets without a surface tag stay asphalt as before.
+* The first generation downloads the area from OSM again (more data is fetched now).
+
+v0.18.0  -  Building use from OSM, fences
+* Overture Maps removed: it turned ordinary houses into giant models. Blocks and houses are chosen as in v0.16.4.
+* NEW: building use from OSM:
+  - pub, restaurant, cafe, guest house inside -> GermanPub,
+  - shop, bank, post office, pharmacy, office -> small town shop house (not a tower block),
+  - school, kindergarten, town hall, police, fire station -> town hall / office,
+  - buildings in a farmyard -> barns, in an industrial area -> halls, in garages and allotments -> sheds,
+  - supermarket in a retail area -> hall.
+  A block of flats with a grocery on the ground floor stays a block of flats.
+* NEW: no more giant models: a shop, office, factory or farm building only gets a model that fits the real
+  footprint, otherwise an ordinary house or shed.
+* Hospital model (TechHospital) and the ornate SovietGovernmentBuildingSmall removed from public buildings.
+* NEW: fences, walls and hedges from OSM (Town tab): picket fence, chain link, brick, stone and concrete
+  walls, hedges. Never across roads or houses, up to 3000 pieces.
+
+v0.17.0  -  More accurate buildings from Overture Maps
+* NEW: buildings are enriched with Overture Maps data (Town tab, on by default):
+  - height and floor count even where OpenStreetMap has none -> blocks of flats, towers and family houses
+    are picked by real height, tall blocks are stacked correctly,
+  - building use (shop, factory, school, church, garage, farm ...) for buildings mapped only as building=yes,
+  - roof shape,
+  - buildings missing from OSM entirely (footprints traced from aerial imagery) are added.
+* Model choice also uses the roof: pitched roof (gabled, hipped ...) = house or farm, not a block of flats;
+  flat roof + 3 floors + depth = small block of flats.
+* Only the map area is downloaded (DuckDB library, run.bat installs it). The first download of an area takes
+  1-5 minutes, then it is cached. If it fails, the map is built from OSM alone as before.
+* The final log shows how many buildings got extra details and how many were added.
+
+v0.16.4  -  Apartment block fix
+* FIX: an old saved apartment-model setting (e.g. SovietBuilding) overrode the new default - the setting has a
+  new key, the screenshot blocks are used by default.
+* Blocks of flats mapped in OSM only as building=yes are recognised by size and depth (over ~260 m², deeper
+  than 9 m) or 4+ storeys and get the apartment block models instead of a big family house.
+* Family houses no longer get the barn model (BarnShed stays for farms only).
+
+v0.16.3  -  Generate button always visible
+* The GENERATE MAP button is pinned to the bottom of the right panel - tabs can't push it off the screen.
+* Settings tabs scroll (mouse wheel / scrollbar on the right). The window fits the screen, the log stays visible.
+
+v0.16.2  -  Fix: missing trees
+* FIX: the game draws at most 4000 trees (engine limit W3DTreeBuffer::MAX_TREES in EA's source) and drops
+  the rest. Trees used to be written forest by forest from a map corner, so with a high limit all visible
+  trees ended up in the first forest and there were none elsewhere.
+* Now: OSM single trees, tree rows and willows first, then trees spread evenly over ALL forests (forest edges
+  first, where they show most), in random order. Default tree limit 3900.
+
+v0.16.1  -  Apartment blocks from the screenshots
+* Default apartment blocks = the models from the player's screenshots: long blocks = block with balconies
+  (StanSovietOffice01/02, joined in a row), short and point blocks = square tower block (EuroHighrise2).
+  An 8-storey block = 2 models stacked. The other models stay selectable in the Town tab.
+
+v0.16.0  -  Patrols, more trees and people
++ Technical patrols: insurgent machine-gun pickups drive round the town streets (0 - 60 patrols), each on a
+  closed waypoint loop the start-up script sends it onto (the engine keeps driving it round).
++ Insurgent outposts spread over the map (0 - 15), in towns and outside, with buildings, towers and units.
++ Max. number of insurgents is typed in (used to be a fixed limit of 800).
++ Trees: up to 300,000 (was 25,000), forest density up to 4x. A big map with forests needs 100,000 - 250,000
+  trees for natural density (test: 150,000 trees on 5 x 5 km in 9 s).
++ More civilians: amount slider, civilians also walk on the pavements, not only next to houses.
+
+v0.15.0  -  Town clearing
++ New TOWN CLEARING mode (Enemy tab, on by default): insurgents occupy every N-th house (default every 3rd)
+  with 1 - 4 soldiers (mostly 1 - 3); 3 difficulties; max. 800 insurgents per map; player bases stay clear.
++ The insurgents are a separate map side (checked in EA's game source: skirmish keeps only FactionCivilian
+  sides); a map start-up script makes them enemies of every player (player0 - player11, both ways) and
+  sends them into the houses.
+* The stronghold now belongs to the insurgents (it used to be neutral) - map centre or a chosen start.
+* TEXTURE FIX: tile indices now follow World Builder exactly (4 sub-tiles per tile). They were wrong before:
+  asphalt showed as grass and the ground had square patches.
++ Texture blending (soft edges between grass, fields, forest, roads, concrete) like World Builder's auto-blend.
+* Rivers and lakes: soft banks instead of stepped walls. * Football goals face each other.
+* Asian stilt houses (RiverHouse01) removed.
+* Menu: tabs fit, sliders clearly visible, wider settings panel.
++ Language switch in the window header - the whole menu changes immediately, settings are kept.
+
+v0.14.0  -  Real terrain slopes
++ New default terrain mode "Real slopes": hills, banks and valleys up to ~900 m across keep their
+  real 1:1 height (test: a 20 m hill = 19.9 m in game); only the slow map-wide rise is compressed
+  so everything fits the game's 255 height steps.
+* Height uses the full 0 - 255 range (water reserve below ground reduced from 16 to 5 units):
+  max. ~38 m at 1:1 instead of 35 m.
+i The 255-step limit comes from the .map format (1 byte per point, 0.625 units per step) = 0.16 m per step at 1:1.
+
+v0.13.0  -  English, Windows .exe
++ Full English interface (default) with Slovak as an option (Export tab -> Language).
++ build_exe.bat builds a single ZeroHourEarth.exe and a ready-to-share zip.
++ App icon.
+
+v0.12.0  -  Living world, rivers, fortress, huge maps
++ Civilians in towns, parked European cars along streets.
++ Tractors, combines, horse carts and hay on fields, oxen on meadows.
++ Ambient sounds: birds, town, river, lake, church bell, park; owl at night, wind and crows in winter.
++ Experimental huge maps up to 2000 x 2000 tiles (5 x 5 km at 1:1).
++ Experimental pre-built enemy fortress (GLA / China / USA) with buildings, towers and units, 3 levels.
+* Rivers written like World Builder rivers, in short pieces following the slope: no deep canyons,
+  water max. ~2 m deep, gentle banks.
+* Wide OSM river areas are drawn as rivers instead of one flat lake across a slope.
+* Lakes: water level from the shore.
+* Missing bridges fixed (OSM bridge ways over water are extended to dry banks), no duplicate bridges.
+
+v0.11.0  -  Up to 12 players
++ 2 - 12 players, manual placement for 12 players, AI paths for all.
+* Bases never overlap (a big team is split into two rows).
+
+v0.10.0  -  Better roads, apartment block choice
+* Road junctions kept, so the game joins streets into T / X crossings.
+* Duplicate / parallel roads (dual carriageways) removed; parking aisles and driveways skipped.
+* Asphalt texture narrower than the road (no jagged tile edges).
++ Apartment block model selectable.
+
+v0.9.0  -  Faster downloads
++ Renamed to Zero Hour Earth, version shown in the window.
++ One OpenStreetMap request, 3 servers at once, fastest server remembered, parallel terrain tiles.
+
+v0.8.0  -  New menu, AI paths
++ Dark tabbed interface, map preview and statistics, saved settings.
++ AI attack paths (Center / Flank / Backdoor), seasons, time of day, many sliders and switches.
+
+v0.7.0  -  Players and apartment blocks
++ 2 - 8 players, start layouts (auto, circle, two teams, manual), resource amount.
++ Long blocks built from joined sections, stacked tall buildings (experimental).
+* Service roads asphalt, building model chosen by height and depth.
+
+v0.6.0  -  European details
++ Petrol stations, football pitches, churches (substitute), cemeteries, playgrounds, parks,
+  car parks, bus stops, street lamps, railways, dense forests by leaf type, willows, OSM trees.
+
+v0.5.0  -  Minimap and menu preview
++ Skirmish menu thumbnail (.tga), roads and towns visible on the minimap.
+
+v0.4.0  -  Playability
++ Bridges. * European buildings, large flat base areas for the AI, stronger terrain.
+
+v0.3.0  -  1:1 scale
++ Fixed 1:1 scale, map size follows the area. * More reliable downloads.
+
+v0.2.0  -  Area selection on the map
++ OpenStreetMap map in the window, mouse selection, place search.
+
+v0.1.0  -  First version
++ .map reader/writer, buildings from INIZH.big, OSM roads/buildings/water/forests, terrain, starts, resources.

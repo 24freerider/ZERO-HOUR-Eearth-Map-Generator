@@ -1,0 +1,1025 @@
+ZERO HOUR EARTH - zoznam zmien (patch notes)
+=============================================
+Generátor reálnych máp z OpenStreetMap pre C&C Generals: Zero Hour.
+Číslovanie: 0.X.Y - X = nová funkcia / väčšia zmena, Y = oprava chýb.
+Verzie 0.1 až 0.8 sú očíslované spätne (predtým sa program volal "CNC Earth").
+
+
+v0.53.5
+- Sústavný režim Zombie používa pôvodné tempo, skladbu hordy a príchody bossov z verzie 0.52.1. Počítadlo fáz pokračuje a limit aktívnych zombíkov sa dá nastaviť.
+
+v0.53.4
+- Obnovené pôvodné vykresľovanie ciest a križovatiek. Vedľajšie asfaltové cesty majú žlté čiary a hlavné ťahy biele prerušované.
+
+v0.53.3
+- Invasion posiela pozemné skupiny z okrajov mapy v nepravidelných intervaloch a mení ich veľkosť aj smer.
+- Pozemné skupiny vyhľadávajú nepriateľské jednotky a budovy po ceste.
+
+v0.53.2
+- Križovatky zachovávajú súvislý hlavný ťah. Vedľajšie cesty sa pripájajú krátkou plochou bez čiar.
+- Kruhové objazdy majú samostatný okruh a obytné ulice užší asfalt bez značenia.
+- Cesty a koľaje rešpektujú medzery v dátach OSM. Poľné cesty používajú vlastný povrch bez ďalšieho podkladu.
+
+v0.53.1
+- Invasion spúšťa útoky cez GLA AI na poslednom štarte, rovnako ako Zombie.
+- Obytné ulice a príjazdy sa opäť vykresľujú ako herné cesty s bielym prerušovaným značením.
+
+v0.53.0
+- Invasion: kooperatívna obrana spoločného veliteľstva, skryté štarty a jeden staviteľ na hráča.
+- Nastaviteľná príprava (predvolene tri minúty) a stupňujúce sa útoky jednej zvolenej frakcie.
+
+v0.52.4
+- Hlavné cesty používajú biele prerušované čiary. Obytné a príjazdové ulice majú neznačený asfalt.
+- Povrch a typ cesty v OSM rozlišujú dlažbu, betón, štrk, hlinu a vyjazdené koľaje.
+- Parkovacie miesta sa kreslia pomocou ParkingLines a autá stoja v rovnakých radoch.
+
+v0.52.3
+- Bežný skirmish pripravuje vyrovnané plochy pre AI pri automatických aj ručných štartoch a chráni prístup k zásobám.
+- Mesto → Pokročilé sprístupňuje hustotu drobnej zástavby, náhradný počet poschodí a skladanie výškových budov.
+
+v0.52.2
+- Šírka panela sa nastavuje deliacou lištou.
+- Sústavný režim má číselný limit živých zombíkov (predvolene 180) a zobrazuje ho v hre.
+- Fázy sústavného režimu pokračujú aj po 40. úrovni, s vyšším tempom a silnejším mixom pri rastúcich zombíkoch.
+
+v0.52.1
+- Survival a Defense používajú Respawn Ambush. Po strate vozidla a odpočte klikni schopnosťou na voľné miesto v aréne, kde sa hneď objaví Humvee.
+- Sólo Survival umožňuje respawn aj poslednému hráčovi. V kooperácii sa hra končí po vyradení celého tímu z arény.
+
+v0.52.0
+- Nastaviteľná šírka panela, kompaktná navigácia a priame zadávanie čísel vedľa posuvníkov.
+- Vodorovné tvary 2:1, 3:1 a 4:1 a štartovacie rozloženie sever proti juhu.
+- Ručné štarty zobrazujú hranice základní. Generátor pre AI vyhľadá, vyrovná a uvoľní blízku suchú plochu.
+- Krajina pridáva skaly, pne a kríky pri brehoch, v lese a na svahoch.
+- Klasický Zombie bez Clearance prichádza z tunela pri strede. Zombíci môžu prichádzať vo vlnách alebo sústavne s rastúcou obtiažnosťou.
+- Survival a Defense sprístupnia Humvee airdrop v ľavom paneli a ponechajú hráčovi jeho zdroj do pristátia.
+
+v0.51.2 – interné: generator.py rozdelený na menšie súbory
+- Správanie generátora sa nezmenilo (overené: rovnaká mapa bajt po bajte pred aj po rozdelení, v 6 režimoch aj na reálnych dátach Poltára).
+- generator.py (4900 riadkov) je teraz jadro + moduly gconst.py (konštanty), g_terrain, g_roads, g_buildings, g_bases, g_nature, g_insurgents, g_zini, g_zmode, g_output. Každá ďalšia úprava sa dotkne len jedného menšieho súboru.
+
+v0.51.1 – nadjazdy a ručné stackovanie bytoviek
+- Nadjazdy: ak sa dve cesty križujú bez spoločnej križovatky a jedna z nich je v OSM označená ako most (bridge / layer), horná cesta sa zmení na skutočný most. Terén okolo hornej cesty sa nadvihne na úroveň mosta (násyp s miernymi rampami), len pás pozdĺž dolnej cesty (aj diaľnice s oboma pruhmi, aj železnice) ostane na úrovni cesty, takže pod mostom sa dá prejsť. Typ mosta sa volí podľa hornej cesty (štvorpruhový, dvojpruhový, dlažbový, drevený). Križovatky bez označenia mostu sa nemenia.
+- Editor: nové políčko „Stack: poschodia navyše (0-6)“ a rýchle tlačidlá Stack +1 / +2 / +3 / = 0. Na označenú bytovku (aj viac naraz) sa navrství ten istý model znova. Funguje na AsiaApartment02 a AsianApartmentSingle01 (nie na CivilianHighrise02). Hodnota sa ukladá do úprav mapy a použije sa pri každom ďalšom generovaní.
+
+v0.51.0 – nastavenie mapy pred generovaním
+- Pred-kontrola nad tlačidlom Vygenerovať: či sú OSM dáta v cache alebo sa budú sťahovať, počet budov v oblasti (po rýchlom náhľade), varovania (veľa ulíc na limit 4000 úsekov, prekrývajúce sa alebo príliš veľké základne, chýbajúci INIZH.big, mapa s týmto názvom už existuje)
+- Rýchly náhľad OSM (karta Oblasť): cesty, voda, lesy a hustota budov nakreslené na mape ešte pred generovaním (oblasť do 8 km)
+- Automatické rozmiestnenie štartov (rohy, kruh, dva tímy, Clearance, Zombie Survival ...) sa kreslí na mape aj so štvorcami „Priestoru pre základňu“; používa rovnaký kód ako generátor (preflight.layout_rel)
+- Mapa s rovnakým názvom sa už neprepíše potichu: program sa opýta – prepísať, alebo vytvoriť novú (Názov_2, Názov_3 ...)
+- Profily nastavení (karta Export): celé nastavenie vrátane miesta a ručných štartov sa uloží pod názvom; štyri vstavané šablóny (bežný skirmish, Clearance, Zombie Survival, Zombie Defense)
+- Hľadanie ukáže viac nájdených miest na výber; tlačidlo ★ vedľa hľadania drží obľúbené a naposledy použité miesta
+- Tlačidlo Náhodné pri semienku
+- Nastavenia sa ukladajú samy chvíľu po každej zmene (nielen pri zatvorení alebo generovaní); pamätá sa aj, či bol log otvorený
+
+v0.50.7
+- Polia: hnedá textúra SandType1darker (vybraná vo World Builderi)
+- Parkoviská: textúra ParkingLotType1c / 1d s čiarami parkovacích miest, smer čiar podľa natočenia parkoviska; autá stoja po 2,5 m medzi čiarami
+
+v0.50.6
+- Polia mimo mesta: sivá alebo hnedá farba zo satelitu (pozbierané, holé pole) je teraz zorané pole CropsType1, nie betón ani sivá hlina; sivá = zastavaná plocha len v meste pri budovách
+
+v0.50.6
+- Polia: hnedá zoraná pôda DirtMediumType5 (textúra TMDirt05a, overená zo súborov hry) – CropsType1 bol zelený a DirtMediumType1 sivý; holá pôda zo satelitu je tiež hnedá
+- Menej tmavej trávy zo satelitu (len naozaj tmavé lesíky a živé ploty)
+- Základne povstalcov: budovy stoja stena pri stene bez medzier (dvere smerom von), paláce otočené o 180°
+- Stanovištia: vrecia s pieskom správne natočené – pozdĺž okrajov a naprieč polovicou cesty
+
+v0.50.5
+- Polia: nová textúra CropsType1 (zorané pole s brázdami, hnedá) namiesto sivej hliny
+- Stanovištia: zátaras z vriec s pieskom naprieč polovicou cesty (už nie pozdĺž), bez objektov, ktoré hra nemá (červená kocka)
+- Parkoviská: na parkovisku už nerastú stromy a každé má krátku príjazdovú cestu k najbližšej ulici
+
+v0.50.4
+- Parkoviská: obslužné cesty, ktoré OSM kreslí cez parkovisko, sa už nestavajú ako cesty – parkovisko je jedna asfaltová plocha a autá na nej stoja v radoch vedľa seba (obsadenosť ~80 %)
+
+v0.50.3
+- Základne povstalcov už neodstraňujú domy: hľadajú voľné miesto tesne vedľa domov mesta (až do ~400 m od pôvodného bodu), aby s nimi hraničili; pred kasárňami a továrňou musí byť voľný pruh na výjazd. Keď sa celý blok nezmestí, každá budova si nájde vlastné voľné miesto
+- Stinger Site pri stanovišti len tam, kde je miesto (bez búrania)
+
+v0.50.2
+- Základne povstalcov: stoja tesne pri domoch mesta, ale nie v nich – domy pod budovami základne sa odstránia; pred kasárňami a továrňou ostáva voľný pruh, aby jednotky vedeli vyjsť
+- Stanovištia povstalcov v uliciach: vrecia s pieskom pri oboch okrajoch, zátaras cez polovicu cesty (jeden pruh ostáva voľný), Stinger Site vedľa cesty, debny a pneumatiky, 3 strážni (rebeli + RPG)
+- Polia z OSM (farmland) sú vždy hnedá zoraná pôda, aj keď je satelitný snímok zelený
+
+v0.50.1
+- Keď sú servery OpenStreetMap preťažené, použijú sa staršie stiahnuté dáta tej istej oblasti (ak existujú) namiesto chyby
+
+v0.50.0 – terén podľa satelitu
+- Textúry zeme podľa skutočných farieb zo satelitného snímku Sentinel-2 (EOX s2maps.eu): zelená lúka, žlté / zrelé pole, hnedá zorané pole a hlina, sivé zastavané plochy, piesok, tmavá zeleň
+- Sťahujú sa len dlaždice nad mapou (z15, ~10 m), uložia sa do cache ~/.cncearth/sat; bez internetu sa použije OSM ako doteraz
+- Lesy, voda, cesty, budovy a strmé svahy idú stále podľa OSM a terénu
+- Zdroj: Sentinel-2 cloudless – https://s2maps.eu by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2020), CC BY-NC-SA 4.0
+
+v0.49.8
+- Pešie hliadky povstalcov pochodujú v čatách po 6: 3 rady po 2 vedľa seba, všetci štartujú spolu na tej istej trase a idú za sebou ako jeden útvar (predtým po 4 rozhádzaní po celej trase)
+
+v0.49.7
+- Generátor už nikdy sám nemení súbor hry Data\INI\GameData.ini (limit ciest) – zmenený súbor bránil spoluhráčom v pripojení; mapy sa robia pre pôvodný limit hry (4000 úsekov ciest, ďalšie ulice sú len ako textúra na zemi)
+
+v0.49.6
+- Clearance + Zombie: zombíci a povstalci sú spojenci – už nebojujú medzi sebou, obaja idú po hráčoch
+
+v0.49.5
+- Clearance + Zombie: zombíci už po 4–5 minútach sami nezmiznú (na dlhej mape nestihli dobehnúť) a ďalšie kolo začne až keď zabiješ všetkých zo súčasného – bez časového limitu
+
+v0.49.4
+- Clearance + Zombie: Humvee obchod sa znova objaví pri štarte (aj v multiplayeri pri každom hráčovi) – predtým sa jeho bod pri severnom režime zombíkov vynechal
+
+v0.49.3
+- Zombie Survival / Defense: žiadne Supply Docks ani ropné veže – peniaze len za zabitých zombíkov
+- Zombie Survival: prvé kolá zombíci zo všetkých štyroch strán mapy (16 miest po obvode), nie len zhora a zdola
+
+v0.49.2
+- Zombie Survival / Defense: vozidlá hráčov už nestoja vo veľkom kruhu cez domy – najviac 6 miest na voľných uliciach a námestiach pri strede, viac hráčov stojí vedľa seba na tom istom mieste; budovy v strede ostávajú
+
+v0.49.1
+- Vysoké dlhé bytovky už nie z úzkych CivilianHighrise01: rovnaké diely ako nízke bytovky (podľa vchodov), postavené na seba do skutočnej výšky; štvorcové ostávajú jedna CivilianHighrise02
+- Priemysel: pribudli ToxinRepository, ChemicalFactory, PharmaceuticalFactory, haly VehicleHanger / StanHanger, sklad ropy; IndustrialBuilding01 / 02 a sklady ostávajú
+- Stromy v meste: medzi bytovkami (trávniky okolo panelákov) a pozdĺž ulíc; v Poltári ~330 stromov navyše
+- Veľkomestá: obchodné centrá (shop=mall alebo veľké obchody) = AsianMegaHotel01 / AsianMegaMall01 / InternationalHotel01
+- Editor prehľadnejší: budovy vyfarbené podľa typu + legenda, tlačidlá na rýchlu zmenu označených (Dom, Bytovka nízka / vysoká, Hala, Priemysel, Garáže, Bez budovy), pod myšou sa ukáže model a poschodia
+
+v0.49.0 – zeleň, parkoviská, chodníky ku vchodom
+- Zeleň v meste z OSM: parky dostanú stromy (~12 m od seba) a kríky, trávniky, záhrady a kroviny (landuse=grass, village_green, leisure=garden, natural=scrub) pár stromov a kríkov
+- Parkoviská: autá v radoch ako na skutočných parkovacích miestach (~2,6 m na auto), časť miest voľná, rôzne autá
+- Chodníky ku vchodom: od každého vchodu bytovky vedie chodník k najbližšej ulici, na strane bytovky, ktorá je k ulici; nevedie cez iné budovy
+- OSM sa stiahne znova (nové údaje o zeleni)
+
+v0.48.0 – editor budov
+- Označenie viacerých budov naraz: ťahaj myšou = obdĺžnik, Ctrl+klik = pridaj / uber; zmena typu alebo poschodí platí pre všetky označené
+- Nové typy: rodinný dom (šikmá strecha), bytovka nízka (podľa vchodov), bytovka vysoká (8 poschodí), hala / telocvičňa, priemysel / sklad, úrad / škola, kôlňa
+- 2D náhľad: po priblížení sú vidieť obrysy modelov z hry (modrá čiarkovaná); pri vybranej budove: modely, poschodia v realite a v hre, strecha rovná / šikmá a či model sedí do pôdorysu alebo pretŕča
+
+v0.47.3
+- Bytovky bez medzier: diely sa mierne prekrývajú (modely majú prázdne okraje), súvislá rada sa postaví aj tesne pri ceste
+- Laser ZBGIS: presnejšia chybová hláška vo výpise (HTTP stav / sieťová chyba)
+
+v0.47.2
+- Slovensko: skutočná výška každej budovy z laserového skenovania ÚGKK (ZBGIS, DMP 1.0 − DMR 5.0) – automaticky, sťahujú sa len dlaždice nad mapou, výsledok sa uloží do cache; výška → poschodia
+- Bytovka = jedna súvislá budova: jeden model opakovaný v rovnej rade, natesno, bez medzier a posunov
+  do 6 poschodí: nepárny počet vchodov = toľko AsiaApartment02, párny = polovica toľko AsianApartmentSingle01
+  7+ poschodí: dlhá = CivilianHighrise01 vedľa seba, štvorcová = jedna CivilianHighrise02
+
+v0.47.1
+- Nízke bytovky podľa počtu vchodov (~12,5 m na vchod): párny počet = len AsianApartmentSingle01 (dva vchody), nepárny = AsianApartmentSingle01 + jedna AsiaApartment02 (jeden vchod) na konci
+
+v0.47.0
+- Bytovky bez počtu poschodí v OSM: krátke bodové domy (do ~22 m, napr. Sklárska Z / H / G / F) = vežiak 8 poschodí → jedna CivilianHighrise02; dlhšie bytovky = 5 poschodí
+- Nízke bytovky nie sú jednotvárne: dlhé (od ~30 m) = AsianApartmentSingle01 (dva vchody), krátke = AsiaApartment02 (jeden vchod)
+- Overené na skutočných OSM dátach Poltára
+
+v0.46.6 – overené na skutočných dátach Poltára
+- Bytovky bez počtu poschodí v OSM (aj celá Sklárska) = 5 poschodí → nízke AsianApartmentSingle01; staré uložené nastavenie 8 poschodí sa už nepoužije (voľba odstránená)
+- Garáže: rady sa tvoria len z garáží stojacich vedľa seba v jednom rade (predtým sa celý garážový areál spojil do pár obrích „radov“, ktoré sa nezmestili) – v Poltári 63 radov, 165 garáží
+- Športová hala (building=sports_hall) = SupplyWarehouse
+
+v0.46.5
+- Garáže sa znova generujú: model MogadishuGarage je hlbší ako skutočná garáž, takže smie siahať cez príjazd – predtým sa celý rad vynechal
+
+v0.46.4
+- Oprava: Poltár sa omylom bral ako husté veľkomesto (veľa malých budov) a 5-poschodové bytovky dostali 10-poschodové diely. Veľkomesto sa teraz pozná podľa toho, koľko mapy je zastavané (Viedeň áno, Poltár nie), a ani vo veľkomeste nedostane dom diel oveľa vyšší, než je v skutočnosti
+- Športové haly (building=sports_hall, areály športových centier) = nízka hala namiesto bytovky
+- Pri futbalových ihriskách už nie sú štadiónové tribúny, len bránky
+
+v0.46.3
+- Bytovky podľa poschodí a tvaru: do 6 poschodí jeden vchod = AsiaApartment02, dlhé bytovky hlavne AsianApartmentSingle01 (dva vchody); 7+ poschodí dlhé = CivilianHighrise01, 7+ poschodí štvorcové (aj mierne obdĺžnikové) = jedna CivilianHighrise02
+- Garáže stoja v radoch tesne vedľa seba ako v realite (susedné garáže z OSM sa spoja do radu)
+- Zombie Survival / Defense: stred mesta už nie je prázdny – voľné ostanú len malé miesta pod vozidlami (a silo)
+
+v0.46.2 – presnejší Poltár
+- Výškové bytovky so štvorcovým pôdorysom („kocky“) = jedna CivilianHighrise02; dlhé obdĺžnikové ostávajú CivilianHighrise01
+- Garáže = MogadishuGarage (aj samostatná malá garáž, už nie Shack)
+- Nemocnica / poliklinika (amenity=hospital / clinic, healthcare) = TechHospital, jedna na areál
+- Priemyselné zóny (aj areály man_made=works, napr. sklárne) = haly a technika: IndustrialBuilding, SovietRadioBuilding, OilRefinery, TechOilRefinery, StanOilTank, sklady – už nie bytovky
+- Železnica ako v realite: jedna rovná hlavná trať (druhá koľaj dvojkoľajky sa zlúči), na ňu sa napájajú vedľajšie koľaje a vlečky; spojky medzi koľajami a koľaje ležiace cez seba v stanici sú preč
+- Poľnohospodárske objekty (kravíny, stajne, veľké stodoly na družstve) = veľké haly
+- OSM sa pre tieto zmeny stiahne znova (nová cache)
+
+v0.46.1
+- Zombie Survival / Defense: stred mesta, kde sa objavia vozidlá hráčov (Defense: silo), sa nechá voľný – v hustom meste sa vozidlá už neobjavia v domoch
+- Clearance: povstalci sú vždy po celom meste, nie natlačení v jednej štvrti
+- Husté veľkomestá (od 900 budov na km², napr. Viedeň): oveľa viac druhov budov podľa výšky, každý dom iný; Poltár a menšie mestá ostávajú ako boli
+
+v0.46.0 – BIG UPDATE pre GeneralsX
+- Generátor je postavený len pre GeneralsX (64-bit): žiadne prepínanie na klasickú hru, žiadny LIGHT ani Stredný detail
+- Vždy plná mapa: civilisti, zaparkované autá, traktory a zvieratá, zvuky, kríky a vŕby, kôlne, ploty, chodníky, vlak, lampy, autá na parkoviskách, ihriská a cintoríny, poschodové budovy, AI trasy, všetky domy z OSM
+- Cesty neobmedzené – limit v GeneralsX sa zvýši sám pri spustení, tlačidlá na limit ciest sú preč
+- Až 32 hráčov, oblasť až 5 × 5 km aj pre Zombie módy
+- Staré nastavenia z LIGHT (menej stromov, vypnuté detaily) sa pri spustení vrátia na plné
+- Mapy sa ukladajú len do Dokumenty\GeneralsX\GeneralsZH\Maps
+- Verzia pre GeneralsOnline (lite) príde neskôr osobitne
+
+v0.45.7
+- Ručné štarty fungujú aj na obdĺžnikovej mape (predtým hlásilo „klikni aspoň 2 štarty v červenom štvorci“)
+
+v0.45.6
+- Cieľová hra jedným klikom prestaví všetko:
+  GeneralsX – nájde priečinok GeneralsX, sám zvýši limit ciest (neobmedzené), plný detail, 32 hráčov, oblasť až 5 × 5 km, mapy do Dokumenty\GeneralsX
+  Klasická – LIGHT, 8 hráčov, oblasť max. 2,5 × 2,5 km, cesty 4000, mapy do priečinka klasickej hry, do hry sa nič nezapisuje
+- Automatické nastavenie GeneralsX prebehne aj pri spustení programu
+
+v0.45.5
+- Priečinok GeneralsX sa nájde sám, aj keď bol v nastaveniach uložený prázdny alebo zlý (chyba „nie je generalszh.exe“)
+
+v0.45.4
+- Anglická verzia je celá po anglicky: tvar mapy, štýl budov, popisy módov, výpisy generovania aj satelitných budov
+
+v0.45.3
+- Oblasť až 5 × 5 km bez experimentálneho prepínača (Zombie módy naďalej 2 × 2 km, s „Veľké Zombie mapy“ 5 × 5 km)
+- GeneralsX: neobmedzené cesty – limit v GameData.ini sa zvýši automaticky (200 000) a generátor cesty neorezáva
+
+v0.45.2
+- Mapa sa ukladá podľa cieľovej hry: GeneralsX → Dokumenty\GeneralsX\GeneralsZH\Maps, klasická → Dokumenty\Command and Conquer Generals Zero Hour Data\Maps (Export má pre každú vlastné pole)
+
+v0.45.1
+- Zombie Defense: obsadené silo už nespotrebúva energiu (žiadne „low power“)
+
+v0.45.0
+- Tvar mapy: Štvorec alebo obdĺžnik sever–juh 1:2 / 1:3 / 1:4 (Oblasť → Tvar)
+- Clearance: automatický štart dole (juh), ideš smerom hore cez mesto
+- Clearance: hlavná základňa povstalcov hore (sever) – jej zničenie = víťazstvo; budovy v meste ostávajú obsadené
+- Clearance + Zombie: zombíci prichádzajú zo severu (od základne povstalcov)
+- Pešie hliadky rebelov (skupiny po 4), nastaviteľné 0–200 (LIGHT max 50)
+
+v0.44.1  (9. 11. 2026)  -  Satelitné budovy len pre tvoju oblasť
+------------------------------------------------------------
+* Satelitné budovy sa sťahujú len pre oblasť mapy: z jedného svetového súboru (Google + Microsoft + OSM,
+  VIDA / source.coop, formát PMTiles) sa prečítajú len dlaždice nad mapou - zvyčajne 1 - 10 MB.
+* Záloha, keby to nešlo: Microsoft dlaždica (najviac 100 MB), z ktorej si program nechá len tvoju oblasť
+  a veľký súbor hneď zmaže. Výsledok pre oblasť sa uloží (pár sto kB), druhé generovanie nič nesťahuje.
+
+
+v0.44.0  (9. 11. 2026)  -  Budovy zo satelitu, hladké kruháče, jednoduchší terén
+------------------------------------------------------------
+* NOVÉ: keď má OpenStreetMap v oblasti menej ako 30 budov (Irak, veľa miest v Afrike a Ázii), program
+  automaticky doplní budovy zo satelitných snímok (Microsoft Global ML Building Footprints). Stiahne sa
+  len potrebná dlaždica a uloží do ~/.cncearth/msbuildings, ďalšie generovanie je už bez sťahovania.
+* NOVÉ: kruhové objazdy sú hladký kruh s rovnakým polomerom (z OSM junction=roundabout), dosť veľký pre
+  cestu, a všetky vjazdy sa napoja presne na kruh - už žiadna "hviezda z dosiek".
+* Terén je vždy skutočný z výškových dát (kopce 1:1) - nastavenia terénu sú preč.
+* Názov mapy je v Exporte.
+* Cieľová hra GeneralsX: ak limit ciest v GeneralsX ešte nie je zvýšený, program ho pri generovaní sám
+  zvýši (len v priečinku GeneralsX) - plný detail s chodníkmi a všetkými ulicami.
+* Súhrn nad tlačidlom ukazuje aj cieľovú hru, detail, limit ciest a čo bude na mape (chodníky, ploty...).
+* ZombieSurvival Defense má vlastné štartovacie peniaze (predvolené 5000), Survival ostáva zvlášť.
+
+
+v0.43.0  (9. 11. 2026)  -  ZombieSurvival prerobený podľa wheel of death
+------------------------------------------------------------
+* OPRAVA: autá ostávali aj prázdnym miestam (až 31 opustených áut) a hráčom ostávali všetky 3 autá.
+  Teraz presne ako "[zombies] wheel of death": každé miesto v lobby s frakciou dostane peniaze, odmenu
+  za zabitie a airdrop a ponechá si len auto svojej frakcie (USA Humvee, Čína Troop Crawler, GLA Battle Bus);
+  prázdne miesto (bez frakcie) stratí všetky autá hneď na začiatku. Nič z toho už nečaká na zombie AI.
+* Zombie AI sa ukáže sám: jeho strana na začiatku vytvorí značkového zombíka (rovnako ako každý spawn) a
+  komu patrí - alebo kto vlastní zombíky, ktoré si človek postaviť nemôže - ten je zombie AI (jeho auto zmizne).
+* NOVÉ: padajúce MiGy ako vo wheel of death - od 6. kola každých 8 - 16 s preletí MiG nad mestom, po 6 - 11 s
+  ho zostrelí a z vraku vyskočia 3 horiaci zombíci (najviac 40 naraz). 4 trasy cez stred mesta.
+
+
+v0.42.1  (9. 11. 2026)  -  Zombie módy aj na 5 x 5 km
+------------------------------------------------------------
+* Keď je zapnuté "Experimentálne obrovské mapy" (Oblasť -> Pokročilé), Zombie, ZombieSurvival aj Defense
+  idú až do 2000 x 2000 dlaždíc (5 x 5 km pri 1:1). Bez neho ostáva limit 2 x 2 km.
+
+
+v0.42.0  (9. 11. 2026)  -  Prehľadnejšie nastavenia, budovy podľa krajiny
+------------------------------------------------------------
+* NOVÉ: "Cieľová hra" hore na Herných módoch: GeneralsX (plná mapa, až 32 hráčov, limit ciest z GeneralsX)
+  alebo Klasická / GeneralsOnline (LIGHT, max. 8 hráčov, cesty v limite 4000).
+* NOVÉ: "Detail mapy: Plný / Stredný / LIGHT" - jedno nastavenie namiesto tucta políčok (tie ostali na kartách
+  Krajina a Mesto na doladenie). LIGHT už nie je políčko v Exporte.
+* NOVÉ: štýl budov podľa polohy mapy (Mesto -> Štýl budov): Európa, Blízky východ a Afrika (hlinené domy,
+  mešity, bazáre), Ázia; alebo ručne. Amerika a Austrália zatiaľ európske.
+* Zombie je jedna karta s výberom Klasický / Survival / Defense a pripomienkou "pridaj GLA AI".
+* Clearance má opravený popis (bez úloh). "Ako hrať" upravené.
+* Max. počet povstalcov: posúvač 0 - 5000.
+* Limit ciest sa zvyšuje len v priečinku GeneralsX (nové pole Export -> Priečinky -> GeneralsX), nikdy v hre na Steame.
+
+
+v0.41.0  (9. 11. 2026)  -  Až 32 hráčov (GeneralsX 0.9.70)
+------------------------------------------------------------
+* NOVÉ: až 32 hráčov, ako vie GeneralsX 0.9.70 (Hráči -> Počet hráčov 1 - 32, ručne až 32 štartov).
+  Pri 13+ hráčoch: vonkajší kruh štartov pri okrajoch a vnútorný okolo mesta, menšie základne, aby sa zmestili.
+* Všetky módy (Clearance, Zombie, ZombieSurvival, Defense, povstalci) počítajú s hráčmi player0 - player31.
+  ZombieSurvival/Defense: vozidlá a respawn pre každého (aspoň 8 ako doteraz), štarty v 2 radoch v okraji.
+* Povstalci majú vlastné číslo štartu 32 (predtým 12) - nebije sa s hráčmi 13+.
+* Počet hráčov sa dá nastaviť aj na 1 (Clearance / Zombie pre jedného hráča).
+
+
+v0.40.1  (9. 11. 2026)  -  OPRAVA: ZombieSurvival nezačal
+------------------------------------------------------------
+* OPRAVA: vo v0.40.0 sa zombie AI hľadal cez "<This Player>" a v hre to nefungovalo - nikto nedostal svoje
+  peniaze ani odmenu za zabitie a autá iných frakcií ostali. Teraz sa na začiatku v čiernom okraji objaví
+  "značkový" zombík na zombie tíme; komu patrí, ten je zombie AI (jeho autá zmiznú, značka tiež).
+  Ľudia potom dostanú peniaze, odmenu za zabitie a len auto svojej frakcie, na štarte nezáleží.
+
+
+v0.40.0  (9. 11. 2026)  -  ZombieSurvival: na štarte nezáleží
+------------------------------------------------------------
+* OPRAVA (ZombieSurvival / Defense): zombie AI sa už nerozoznáva podľa spodného štartu, ale sám sa ohlási
+  (jeho skripty bežia za GLA AI). Ktokoľvek môže mať ktorýkoľvek štart - aj človek na spodnom dostane vozidlo,
+  peniaze a respawn. Zombie AI si svoje vozidlo zmaže sám.
+* Keď v lobby nie je GLA AI (pán zombíkov), po 15 sekundách sa v hre ukáže upozornenie, že ho treba pridať.
+
+
+v0.39.0  (9. 11. 2026)  -  LIGHT verzia pre klasickú hru
+------------------------------------------------------------
+* NOVÉ: Export -> "LIGHT verzia pre klasickú hru (GeneralsOnline)". Pre pôvodný 32-bitový Zero Hour, ktorý
+  zvládne menej ako GeneralsX: najviac 2500 stromov, bez plotov, lámp, zaparkovaných áut, premávky, chodníkov
+  a detailov, menej civilistov a povstalcov (max. 2 v dome), cesty vždy v limite hry (4000 úsekov).
+  Test 4x4 km: 8201 -> 3192 objektov. Do mena mapy pridá [LIGHT].
+
+
+v0.38.1  (9. 11. 2026)  -  Clearance zjednodušený
+------------------------------------------------------------
+* Clearance je jednoduchší: len povstalci v budovách a počítadlo "Insurgents left" (koľko ich ešte ostáva).
+  Ciele (radnica, kostol, sklad zbraní) sú vypnuté - mapa má menej objektov a skriptov.
+
+
+v0.38.0  (9. 11. 2026)  -  Clearance a Zombie pre viac hráčov
+------------------------------------------------------------
+* OPRAVA: Clearance a klasický Zombie dávali vždy len 2 štarty (ty v strede + AI v rohu) a ignorovali počet
+  hráčov aj ručne naklikané štarty. Teraz pri 2 a viac hráčoch platí tvoje rozmiestnenie a počet.
+  Povstalci štart nepotrebujú (sú samostatná strana), ako predtým.
+* Pridá sa 1 štart navyše v najvzdialenejšom rohu pre AI: v Zombie je to zombie AI (GLA), v Clearance
+  "spiaci" AI, aby hra neskončila hneď výhrou. V lobby pridaj AI až za ľudských hráčov.
+* Povstalci a ich posily (QRF) idú po všetkých hráčoch, ciele (radnica, kostol, sklad) splní ktokoľvek a
+  odmenu dostane každý hráč. Zombie: každý hráč dostane obchodný Humvee pri svojom štarte.
+* 1 hráč: bez zmeny (stred mesta + spiaci AI).
+
+
+v0.37.2  (8. 11. 2026)  -  OPRAVA: zamrznutie hry u hostiteľa
+------------------------------------------------------------
+* OPRAVA (ZombieSurvival / Defense, multiplayer): vo v0.37.1 zamŕzala hra tomu, kto vytvoril server.
+  Kamera pre každého zvlášť ("<Local Player>") je preč. Kamera sa na začiatku presunie všetkým rovnako
+  do mesta k vozidlám (v Defense k silu) - rovnako ako vo "[zombies] wheel of death".
+
+
+v0.37.1  (8. 11. 2026)  -  ZombieSurvival: kamera na tvoje vozidlo
+------------------------------------------------------------
+* OPRAVA (ZombieSurvival / Defense, multiplayer): na začiatku mala kamera hráča čiernu obrazovku, lebo štart
+  je mimo hracej plochy. Teraz sa každému hráčovi na jeho počítači kamera presunie na jeho vlastné vozidlo
+  (Humvee / Troop Crawler / Battle Bus). Mení sa len pohľad, takže hra sa medzi hráčmi nerozíde.
+
+
+v0.37.0  (8. 11. 2026)  -  Kompaktná mapa
+------------------------------------------------------------
+* NOVÉ: Export → "Kompaktná mapa (komprimovaná)" (zapnuté). Mapa sa uloží komprimovaná rovnako ako
+  oficiálne mapy hry (RefPack "EAR") - je asi 10x menšia (test: 3,8 MB → 0,34 MB) a nič z nej nechýba.
+  Hra ju pri načítaní rozbalí sama. Menšia mapa sa rýchlejšie pošle spoluhráčom v lobby.
+* Program (aj editor) vie čítať aj komprimované mapy.
+
+
+v0.36.0  (8. 11. 2026)  -  Defense: obsadené silo je tvoje, zombíci verne podľa wheel of death
+------------------------------------------------------------
+* OPRAVA (Defense): obsadenie sila ho zničilo a hra skončila prehrou. Teraz silo ostane tomu, kto ho obsadí,
+  a jeho atómovka je jeho - bez elektriny. Prehra je iba pri skutočnom zničení sila.
+* Silo sa samo pomaly opravuje (10 HP/s), keď ho 8 sekúnd nikto neudrie.
+* Defense: zombíci idú primárne na silo, ale hráča, ktorý je do ~100 m od nich, napadnú. Pri sile už idú
+  na silo.
+* ZOMBÍCI verne podľa "[zombies] wheel of death" v5-6: rýchlosti 25 / 32 / 36 / 40, horiaci zombík (300 HP,
+  pri smrti tlaková vlna), rýchly GC zombík (87), boss 3000 HP s pancierom (výbuchy mu nič nerobia) a nožom.
+  Ceny (odmena za zabitie) 200 / 600 / 1000 / 1500 / 1800 / 3500.
+* Zombíci sa vylepšujú ako v originále: prvý Chem zombík prinesie pancier (+30 HP malým), prvý GC zombík
+  rýchlejšie nohy.
+* Nové zloženie vĺn: od 10. kola Chem a horiaci, od 13. GC, od 16. boss - obyčajní zombíci stále prevládajú.
+
+
+v0.35.0  (8. 11. 2026)  -  ZombieSurvival Defense, zombíci ako vo wheel of death, roztrúsené vlny
+------------------------------------------------------------
+* NOVÝ MÓD ZombieSurvival Defense: v strede mesta stojí čínske atómové silo. Zombíci idú naň z náhodných
+  strán (smer sa mení zombík po zombíkovi). Keď ho zničia, vybuchne, ostane radiácia a prehrali ste.
+  Oprava: obsaď silo pešiakom (capture) - nahradí sa novým s plnými životmi. Inak ako ZombieSurvival
+  (obchod podľa frakcie, peniaze za zabitie, respawn airdropom - v Defense vždy, aj keď nikto nežije).
+* ZOMBÍCI ako vo "[zombies] wheel of death": vidia celú mapu, lezú aj na útesy, vybuchnú až keď k tebe dobehnú
+  (nie keď ich zastrelíš), 5 typov: rýchlosť 25 / 32 / 36 / 40, 120 - 200 HP, boss 600 HP s nožom
+  (zabije na jeden úder). Žijú 4 - 5 minút.
+* VLNY ROZTRÚSENÉ: zombíci prichádzajú postupne, 2 za sekundu, každý z iného miesta. Prvých 5 kôl z 5 bodov
+  po celom hornom a 5 po dolnom okraji, potom z kruhu okolo mesta.
+
+
+v0.34.0  (8. 11. 2026)  -  ZombieSurvival: obchod pre každú frakciu, bez buldozéra, zombíci z hora aj z dola
+------------------------------------------------------------
+* Vozidlo-obchod podľa frakcie (ako vo wheel of death: v mape sú všetky tri, skript nechá to tvoje):
+  USA = Humvee, Čína = Troop Crawler, GLA = Battle Bus. Unesú 6 vojakov, všetci strieľajú z vnútra.
+* Spravodlivá ponuka: každá frakcia má Pathfinder (sniper), Jarmen Kell, Mini-Gunner a plk. Burton
+  + vlastného základného a protitankového pešiaka (Ranger/Missile Defender, Red Guard/Tank Hunter,
+  Rebel/RPG). Na 2. strane upgrady frakcie (pancier, oprava, + 3 vlastné).
+* Bez buldozéra a robotníkov na začiatku (veliteľské centrum ostáva mimo mapy).
+* Prvých 5 kôl: zombíci polovica z hora a polovica z dola, zo stredu okraja mapy; potom z kruhu okolo mesta.
+
+
+v0.33.4  (8. 11. 2026)  -  Rozmiestnenie "Zombie Survival (automaticky)"
+------------------------------------------------------------
+* Karta Hráči, Rozmiestnenie: nová voľba "Zombie Survival (automaticky)". Zapnutím ZombieSurvival sa nastaví
+  sama a štarty netreba klikať na mape (ani ručné štarty sa nepoužijú). Vypnutím sa vráti automatické.
+
+
+v0.33.3  (8. 11. 2026)  -  ZombieSurvival: základňa mimo mapy, zombíci hneď a zblízka, počítadlo živých
+------------------------------------------------------------
+* ZombieSurvival: štarty sú MIMO hracej plochy, v čiernom okraji mapy (ako vo wheel of death) - veliteľské
+  centrum a buldozér tam vzniknú, ale nevidíš ich a nedostaneš sa k nim. Bojuješ len s Humvee v meste.
+  Zrušené "pero" v rohu.
+* Zombíci (Zombie aj ZombieSurvival): prvých 5 kôl chodia z jedného miesta kúsok na sever od boja
+  (~225 m), takže prídu rýchlo; od 6. kola z kruhu okolo mesta. Prvá vlna predvolene po 10 s.
+* Nové počítadlo "Zombies left:" - koľko zombíkov ešte žije na mape (presne do 30, potom po krokoch).
+
+
+v0.33.2  (8. 11. 2026)  -  ZombieSurvival prerobený presne podľa "[zombies] wheel of death"
+------------------------------------------------------------
+* Veliteľské centrum sa už NEMAŽE. Štarty ľudí sú v uzavretom "pere" v rohu mapy (znížený blok terénu so
+  zrázmi - dnu ani von sa nedá prejsť). Centrum ťa drží v hre a vypláca peniaze za zabitie (Cash Bounty).
+* Humvee sú položené priamo v mape v strede mesta pre hráčov 0-7 (ako vo wheel of death); skript zmaže
+  Humvee prázdnych slotov a zombie AI.
+* "Mŕtvy" = nemáš v meste (mimo pera) žiadnu jednotku - vtedy beží respawn; keď nikto nemá v meste nič,
+  koniec hry.
+* Rozmiestnenie: štarty 1..N = ľudia v pere, posledný štart = zombie AI v protiľahlom rohu.
+
+
+v0.33.1  (8. 11. 2026)  -  Oprava ZombieSurvival, vlastné nastavenia zombíkov
+------------------------------------------------------------
+* OPRAVA ZombieSurvival: hneď po zmiznutí veliteľského centra hra hlásila porážku. Skript najprv odovzdal
+  skrytú pomocnú budovu hráčovi a až potom zmazal jeho štartovú základňu - a hra zmaže všetko, čo je v tej
+  chvíli v hráčovom tíme, aj tú budovu. Teraz sa základňa maže ako prvá. Koniec hry sa navyše môže spustiť
+  až keď hráč naozaj dostal Humvee.
+* HERNÉ MÓDY - vlastné nastavenia: karta "Zombíci" (počet v 1. vlne, prírastok za vlnu, prvá vlna po,
+  pauza medzi vlnami, rastúci zombíci aj v klasickom Zombie), karta "ZombieSurvival" (štartovacie peniaze,
+  respawn po, peniaze za zabitie v %) a tlačidlo na nastavenia povstalcov. Ľahká / Stredná / Peklo nastaví
+  aj tieto hodnoty, takže hneď vidíš, čo preset zmenil.
+* KLASICKÝ ZOMBIE: voľba "Rastúci zombíci" - rovnaké stupne a mix ako v ZombieSurvival, bez peňazí za zabitie.
+
+
+v0.33.0  (8. 11. 2026)  -  Nový herný mód ZombieSurvival
+------------------------------------------------------------
+* ZOMBIESURVIVAL (nová karta v Herných módoch, na princípe "[zombies] wheel of death"):
+  - žiadna základňa: veliteľské centrum a buldozér zmiznú, každý dostane Humvee obchod a $2000,
+  - v meste nie sú povstalci (všetky voľby povstalcov sa ignorujú), jediný nepriateľ sú zombíci,
+  - peniaze za každého zabitého zombíka (10 % jeho ceny): normálny $20, väčší $30, silný $45,
+    ťažký $70, boss $200,
+  - zombíci rastú s vlnami - väčší, rýchlejší a s viac HP - ale normálni ostávajú väčšinou aj neskôr
+    (vlna 15+: 40 % normálnych, 25 % väčších, 20 % silných, 12 % ťažkých, 3 % bossov),
+  - po zničení Humvee: ak spoluhráč ešte žije, o 60 s sa v ľavom paneli objaví airdrop - klikneš, kam
+    chceš, a lietadlo zhodí nový Humvee. Upgrady ostávajú. Keď už nikto nemá Humvee, koniec hry.
+  - Hrá sa: ľudia na štartoch v strede, 1 AI za GLA na POSLEDNOM štarte (roh). Počet hráčov = ľudia + 1.
+  - Nedá sa kombinovať s Clearance ani Zombie (zapnutím sa tie vypnú). Mapa najviac 2 × 2 km.
+  - Názov mapy: "[ZOMBIE SURVIVAL] Poltar".
+
+
+v0.32.2  (8. 11. 2026)  -  Herný mód v názve mapy
+------------------------------------------------------------
+* Mapy s herným módom majú mód v hranatej zátvorke na začiatku názvu (ako "[zombies] wheel of death"):
+  "[ZOMBIE] Poltar", "[CLEARANCE] Poltar", "[CLEARANCE+ZOMBIE] Poltar". V zozname máp v hre ich hneď spoznáš.
+* Úpravy z editora (budovy, základne) platia pre miesto bez ohľadu na mód - "[ZOMBIE] Poltar" použije tie isté
+  úpravy ako "Poltar".
+
+
+v0.32.1  (8. 11. 2026)  -  Nové logo: zemeguľa + ZERO HOUR EARTH
+------------------------------------------------------------
+* Logo v hlavičke: zemeguľa (Európa a Afrika, s oceánom, svetlom a atmosférou) a nápis ZERO HOUR v štýle
+  chrómu + žiariace oranžové EARTH. Ikona okna a .exe je teraz tá istá zemeguľa.
+* Logo aj ikona sa dajú pregenerovať skriptami v priečinku tools (make_logo.py, globe.py).
+
+
+v0.32.0  (8. 11. 2026)  -  Ostré okno na 4K, nové logo
+------------------------------------------------------------
+* OSTRÉ NA 4K / HIGH-DPI: aplikácia sa hlási Windowsu ako DPI-aware, takže ju už nezväčšuje rozmazane.
+  Písmo, okno, posuvníky, mapa aj náhľad sa prepočítajú podľa DPI monitora.
+* NOVÉ LOGO: emblém zemegule v zameriavači (kreslený v plnom rozlíšení, ostrý pri každej veľkosti),
+  nápis "ZERO HOUR" + oranžové "EARTH", pod ním podnadpis a verzia. Rovnaký emblém je ikona okna a .exe.
+* Oranžová linka pod hlavičkou, karty s oranžovým pásikom pri nadpise.
+
+
+v0.31.2  (8. 11. 2026)  -  Zombie: vlna až po vyčistení, menšie mapy
+------------------------------------------------------------
+* ZOMBIE: ďalšia vlna príde, až keď zničíš všetkých zombíkov z tej predošlej. Potom správa
+  "Wave cleared!" a 15 s pauza. (Poistka: ak by sa nejaký zombík niekde zasekol, ďalšia vlna príde
+  najneskôr po 5 minútach.)
+* ZOMBIE: len pre menšie mapy - najviac 800 × 800 dlaždíc (2 × 2 km pri 1:1). Pri zapnutom Zombie móde
+  sa veľkosť oblasti sama obmedzí.
+
+
+v0.31.1  (8. 11. 2026)  -  Oprava pádu pri veľkých mapách s hernými módmi
+------------------------------------------------------------
+* OPRAVA: "attempt to get argmin of an empty sequence" pri Clearance / Zombie na veľkej mape (napr. 5 × 5 km):
+  štart neutrálnej AI v rohu mapy hľadal miesto mimo mapy.
+
+
+v0.31.0  (8. 11. 2026)  -  Nové, prehľadnejšie okno
+------------------------------------------------------------
+* Menu vľavo s ikonami namiesto záložiek: Herné módy, Oblasť, Hráči, Krajina, Mesto, Nepriateľ, Export, Náhľad.
+* Herné módy ako veľké karty (Clearance / Zombie / Čierna mapa) - klik zapne/vypne, zapnutá svieti oranžovo.
+  Obtiažnosť ako 4 tlačidlá (Vlastná / Ľahká / Stredná / Peklo) a krátky návod "Ako hrať".
+* Každá stránka je rozdelená do kariet. Málo používané voľby sú schované v "▸ Pokročilé" (klik rozbalí).
+* Dlhé vysvetlivky sú v ikonke ⓘ - ukážu sa po prejdení myšou.
+* Nad tlačidlom VYGENEROVAŤ je súhrn: názov • veľkosť • hráči • módy • obtiažnosť.
+* Pod ním riadok s aktuálnym krokom generovania; podrobný log sa rozbalí cez "Log ▸".
+
+
+v0.30.0  (8. 11. 2026)  -  Úlohy, posily povstalcov, obtiažnosti, upgrady v Humvee, hustejšie lesy
+------------------------------------------------------------
+* CLEARANCE - ÚLOHY: oslobodiť radnicu (najväčšia verejná budova), oslobodiť kostol, zničiť sklad zbraní.
+  Ciele sú na začiatku odkryté na mape, sú strážené. Za každú: $5000 + posily (Rangeri, Humvee, tanky).
+  Navrchu počítadlo "Objectives done". Úloha "oslobodiť" je splnená, keď v okolí nie je žiadny ozbrojený
+  povstalec a stojí tam tvoja jednotka.
+* POVSTALCI POSIELAJÚ POSILY: mesto je rozdelené na štvrte, v každej s povstalcami stojí zásahová jednotka
+  (technicals, RPG, rebeli). Keď vojdeš do štvrte alebo k nej, vyrazí na teba. Voľba na karte Nepriateľ.
+* OBTIAŽNOSŤ jedným klikom (HERNÉ MÓDY): Ľahká / Stredná / Peklo nastaví počet povstalcov, výrobu, vlny,
+  hliadky, ropné veže aj veľkosť a tempo zombie kôl. "Vlastná" nechá tvoje nastavenia.
+* ZOMBIE - HUMVEE UPGRADY: tlačidlo 13 prepne na druhú stranu: pancier (+800 Humvee, +60 pešiaci), oprava
+  za jazdy, TOW rakety, pokročilý výcvik, granáty Rangerov, obsadzovanie budov. Tlačidlo 13 späť.
+* HUSTEJŠIE LESY: stromy v lese sa zhlukujú do hustých hájov namiesto riedkeho rovnomerného rozptylu,
+  takže rovnaký počet stromov pôsobí ako hustý les.
+* TERÉN: výškové dáta sa sťahujú o úroveň jemnejšie (až zoom 15) - presnejšie svahy a údolia.
+  Pozn.: zdrojové dáta majú v Európe ~30 m rozlíšenie, takže zlepšenie je mierne.
+
+
+v0.29.1  (8. 11. 2026)  -  Čierna mapa
+------------------------------------------------------------
+* Nová voľba "Čierna mapa" v sekcii HERNÉ MÓDY (predvolene zapnutá): na začiatku hry je celá mapa aj minimapa
+  čierna a odkrýva sa len tam, kam dovidia tvoje jednotky. Aj okraj mimo hracej plochy je čierny.
+  Funguje pre každú mapu, nielen pre Clearance a Zombie.
+
+
+v0.29.0  (8. 11. 2026)  -  Počítadlo v Clearance, pevnosť s voľnými východmi, viac zombíkov
+------------------------------------------------------------
+* CLEARANCE: navrchu obrazovky počítadlo "Insurgents left" - koľko povstalcov ešte môže bojovať (vojaci,
+  aj tí v domoch, vozidlá, obrana). Presne do 20, potom po 5 / 25 / 100.
+* PEVNOSŤ: War Factory (Arms Dealer) a kasárne stoja vedľa seba v prednom rade s uličkou pre tank, dverami
+  k stredu mapy. Ostatné budovy stoja v zadnom rade chrbtom k nim, dverami von. Žiadny východ nie je zablokovaný.
+  Obrana je nalepená na rohoch budov.
+* ZOMBIE: viac zombíkov od začiatku (1. kolo 12, potom +6 každé kolo, každé 5. kolo navyše).
+
+
+v0.28.2  (8. 11. 2026)  -  Zombie: Humvee obchod
+------------------------------------------------------------
+* V Zombie móde dostaneš pri štarte Humvee "obchod" (ako v "[zombies] wheel of death"): cvičí pešiakov priamo
+  v sebe - Ranger, Missile Defender, Pathfinder (sniper), plk. Burton, Red Guard, Tank Hunter, Jarmen Kell -
+  bez kasární. Unesie 6 vojakov, ktorí z neho môžu strieľať.
+* Vedľa mapy sa ukladá map.ini (len v Zombie móde), ktorý Humvee takto upraví.
+
+
+v0.28.1  (8. 11. 2026)  -  Zombie mód nanovo, podľa "[zombies] wheel of death"
+------------------------------------------------------------
+* Zombie mód prerobený na princípe overenej mapy "[zombies] wheel of death": zombíkov riadi AI za GLA
+  z lobby (mapa jej dá vlastné skripty a tímy strany SkirmishGLA), nie povstalci.
+* Kolá: po 1 minúte začne 1. kolo, ďalšie každých ~45 s (postupne rýchlejšie), v každom viac zombíkov.
+  Od 3. kola toxickí terroristi, každé 5. kolo aj bombové autá. Zombíci vybiehajú zo 6 miest po okrajoch mapy
+  a každé 3 sekundy si znova nájdu cieľ.
+* Navrchu obrazovky počítadlá "Round" a "Zombies this round" (súbor map.str vedľa mapy).
+* Ako hrať Zombie: štart 1 pre seba + 1 AI za GLA (hocijaký GLA generál) - ona riadi zombíkov.
+  Clearance: štart 1 + 1 hocijaká AI (ostane neutrálna). Oba módy naraz: AI za GLA.
+
+
+v0.28.0  (8. 11. 2026)  -  Herné módy: Clearance a Zombie
+------------------------------------------------------------
+* Nová sekcia HERNÉ MÓDY navrchu okna. Zaškrtneš jeden, oba, alebo žiadny - platí pre mapu, ktorú generuješ.
+  Všetko je v skriptoch mapy: nič sa neinštaluje, hra cez internet zostáva v poriadku.
+* CLEARANCE: začínaš v strede mesta, mapa je čierna a odkrýva sa, kam prídeš. Povstalci sú po celom meste,
+  majú základne, vyrábajú a útočia vo vlnách. Keď zničíš všetkých povstalcov, vyhráš (víťazná obrazovka hry).
+* ZOMBIE: hniezda (kasárne) pri okrajoch mesta. Po pokojnom začiatku (3 min.) z nich vybiehajú hordy GLA
+  Terroristov, ktoré lovia tvoju základňu a vybuchujú. Každých 5 minút pribudne silnejšia vlna. Zničením hniezd
+  hordy zastavíš.
+* Ako hrať: v Skirmishi zvoľ pre seba štart 1 a pridaj jednu AI (hocijakú). Mapa ju hneď spraví neutrálnou
+  a bez peňazí - len drží hru bežať, lebo hra by sólo hráča hneď vyhlásila za víťaza.
+* Mapy sa predvolene ukladajú do Dokumenty\GeneralsX\GeneralsZH\Maps, ak máš GeneralsX.
+
+
+v0.27.1  (8. 11. 2026)  -  AI znova stavia, pevnosť s uličkami
+------------------------------------------------------------
+* OPRAVA AI: počítač odmieta stavať tam, kde stojí nepriateľský objekt. Keď boli povstalci zase po celom meste,
+  mohli stáť v obsadených domoch blízko štartu a AI potom nestavala vôbec. Teraz nie je žiadny povstalec
+  bližšie ako 1600 jednotiek (~400 m) od štartu, bez ohľadu na veľkosť základne.
+* Stred štartovej základne bez stromov je väčší (330 jednotiek), aby mala AI miesto na prvé budovy.
+* Pevnosť: budovy stoja vedľa seba v bloku, medzi nimi je ulička pre tank (~14 m).
+* Obrana pevnosti je nalepená na rohoch budov (najprv rohy bloku, potom rohy pri uličkách),
+  aby neupchala uličky.
+
+
+v0.27.0  (8. 11. 2026)  -  Ropné veže, hustá pevnosť, les zostáva v základni
+------------------------------------------------------------
+* Ropné veže (TechOilDerrick) pri povstalcoch: okolo ich základní (alebo v ich oblasti). Kto ich obsadí,
+  zarába peniaze. Počet sa nastavuje na karte Nepriatelia (0 = žiadne).
+* Menšia štartová základňa: posúvač veľkosti základne je teraz 200 až 1600 (predvolene 600), takže
+  v meste zmizne menej budov.
+* Stromy v štartovej základni zostávajú. Les sa vyrúbe len v malom strede, kde stojí veliteľské centrum.
+  Ostatné (budovy, cesty) sa zo základne stále odstraňujú.
+* Povstalci sú predvolene zase po celom meste (ako predtým). Nové políčko "Povstalci na jednom mieste"
+  ich sústredí do jednej kompaktnej oblasti (alebo do oblasti, ktorú nakreslíš v editore).
+* Hlavná základňa povstalcov je naozaj hustá: budovy stoja tesne pri sebe, dotýkajú sa, a podľa
+  úrovne pribudnú ďalšie (obchodník so zbraňami, palác, sklad zásob ...). Obrana je okolo celého bloku.
+
+
+v0.26.2  (8. 11. 2026)  -  Vedľajšie ulice nie sú tráva
+------------------------------------------------------------
+* Ulice, ktoré sa nezmestia do limitu ciest v hre, sa namaľujú aspoň ako asfalt (dlažba, hlina podľa povrchu)
+  na zemi, takže namiesto trávy je v meste vidno všetky ulice. Hlavné ulice sú vždy skutočné cesty.
+  Na nich sa ani nič nestavia (budovy, stromy, jednotky).
+
+
+v0.26.1  (8. 11. 2026)  -  Skutočné budovy majú prednosť
+------------------------------------------------------------
+* Základne povstalcov a pevnosť sa stavajú až po budovách mesta a už kvôli nim nezmizne žiadny skutočný dom.
+  Najprv hľadajú voľné miesto, inak sa ich budovy môžu prekrývať s domami (nikdy nie s cestami, vodou
+  a základňami hráčov).
+
+
+v0.26.0  (8. 11. 2026)  -  AI útočí, Dunaj v skutočnej šírke, útočné vlny povstalcov
+------------------------------------------------------------
+* OPRAVA AI: skripty AI v skirmishi hľadajú v mape oblasti okolo základní (InnerPerimeter1, OuterPerimeter1 ...).
+  Mapy ich nemali, preto AI len stavala a neútočila. Teraz má každý štart vnútorný a vonkajší obvod
+  (a povstalci číslo 13).
+* OPRAVA: rieky v skutočnej šírke. Šírka sa meria v každom bode podľa brehov z OSM (aj keď sú orezané
+  okrajom mapy), inak podľa značky width. Dunaj má ~300 m namiesto 14 m. Načítava sa aj staré značenie
+  waterway=riverbank.
+* Mosty až do 1,1 km, takže cesty cez Dunaj majú celý most.
+* NOVÉ: útočné vlny povstalcov. Keď je pri základni 5 tankov (nastaviteľné v karte Nepriateľ), celá skupina
+  tankov a pešiakov z tej základne vyrazí na hráčov. 0 = len bránia základňu.
+* Veľké mesto: veľké budovy s plochou strechou už nie sú mriežka z malých kociek:
+  obchodný dom = GreekShop, dlhá kancelárska budova = SovietRadioBuilding, výšková budova = CivilianHighrise02,
+  hlboký mestský blok = väčšie kusy. Haly (sklady) len pre supermarkety a nákupné centrá.
+* Pri prvom generovaní sa oblasť stiahne z OSM znova.
+
+
+v0.25.0  (8. 11. 2026)  -  Veľké mestá: limit ciest, budovy bez limitu
+------------------------------------------------------------
+* NOVÉ: tlačidlo "Zvýšiť limit ciest v hre" (karta Export). Hra vykreslí len 4000 úsekov ciest, preto vo
+  veľkých mestách (napr. Bratislava 5x5 km) chýbali ulice a ostala z nich len hranatá textúra.
+  Tlačidlo zapíše do priečinka hry Data\INI\GameData.ini s limitom 40 000 (tak ako to robia módy).
+  Platí po reštarte hry. Tlačidlo "Vrátiť pôvodný" ho odstráni (vlastný GameData.ini z módu sa zálohuje
+  a obnoví). Generátor si limit zistí sám a podľa neho zapíše všetky ulice.
+  Pozor: online hra s hráčmi bez zvýšeného limitu nahlási nezhodu. Skirmish proti AI funguje normálne.
+* Budovy už nemajú obmedzený počet (predtým max. 7000 kusov).
+* Predvolený strop povstalcov je 4000 (natlačení v oblasti povstalcov).
+
+
+v0.24.0  (8. 11. 2026)  -  Chýbajúce ulice
+------------------------------------------------------------
+* OPRAVA: hra vykreslí najviac 4000 úsekov ciest (MaxRoadSegments v GameData.ini) a každú ďalšiu
+  cestu mlčky vynechá. Program ich na väčších mapách zapisoval viac, preto niektoré ulice v hre chýbali.
+  Teraz program počíta úseky tak ako hra (aj zákruty a križovatky), zostane pod limitom a vynechá
+  najskôr chodníky a poľné cesty, nie ulice. Ak sa niečo nezmestí, povie to vo výpise.
+* OPRAVA: sťahujú sa aj spojky a zjazdy (primary_link, secondary_link, tertiary_link ...) a cesty
+  typu "road" / "busway". Predtým úplne chýbali.
+* OPRAVA: uličky (service=alley) a dlhšie príjazdové cesty (service=driveway, od 30 m), napr. asfaltky
+  medzi panelákmi, sa už nevyhadzujú.
+* Filter duplicitných ciest je miernejší: krátke ulice pri križovatkách už nemiznú.
+* NOVÉ: prepínač "Chodníky medzi panelákmi a cez parky" v karte Mesto (pri veľkých mapách ich môžeš
+  vypnúť, aby zostalo viac úsekov na ulice).
+* Pri prvom generovaní sa oblasť stiahne z OSM znova.
+
+
+v0.23.2  (8. 11. 2026)  -  Zdrojový kód na zdieľanie
+------------------------------------------------------------
+* Balík z build_exe.bat obsahuje okrem .exe aj priečinok "source" so zdrojovým kódom.
+* NOVÉ: DEVELOPERS.txt (anglicky): ako program spustiť zo zdrojov, čo robí ktorý súbor, ako funguje formát
+  mapy, AI trasy, skripty povstalcov a vlak, kam sa čo ukladá a ako pridať nové modely alebo prvky z OSM.
+* selftest.py funguje na každom PC: python selftest.py "cesta k hre".
+
+
+v0.23.1  (8. 11. 2026)  -  Čistá šablóna na zdieľanie
+------------------------------------------------------------
+* Priložená šablóna mapy (template.map) je nová a čistá: rovný terén, jedna tráva, žiadne objekty
+  z inej mapy. Predtým to bola mapa Poltáru z maptoplay. Vygenerované mapy sú úplne rovnaké ako predtým.
+
+
+v0.23.0  (8. 11. 2026)  -  Oblasť povstalcov, výroba jednotiek
+------------------------------------------------------------
+* NOVÉ: OBLASŤ POVSTALCOV. V editore (režim "Oblasť povstalcov") nakreslíš kruh: klikni do stredu
+  a ťahaj. Kruhov môže byť viac, pravý klik kruh zmaže. Povstalci v domoch, hliadky aj ich základne
+  a pevnosť budú len v nakreslenej oblasti.
+  Bez nakreslenej oblasti program zvolí kompaktnú oblasť (250-600 m) v centre najväčšieho mesta,
+  mimo základní hráčov. Predtým boli povstalci roztiahnutí po celej mape.
+* NOVÉ: základne povstalcov sú kompaktné a majú len War Factory a kasárne (+ obranu a jednotky).
+  - War Factory vyrába tanky, kasárne pešiakov. Predvolene každá budova 1 jednotku za 2 minúty,
+    spolu teda 1 jednotka za minútu na základňu. Nastavíš v karte Nepriateľ (0 = bez výroby).
+  - Keď budovu zničíš, výroba z nej sa zastaví.
+* Odstránené tlačidlo "Otvoriť vo World Builderi" (World Builder tieto mapy nezvláda).
+* Predvolený jazyk pre nových používateľov je angličtina.
+
+
+v0.22.0  (8. 11. 2026)  -  Editor mapy, paneláky podľa výšky, World Builder
+------------------------------------------------------------
+* NOVÉ: EDITOR MAPY (karta Náhľad -> "Upraviť budovy a základne povstalcov").
+  - Klikneš na budovu a vyberieš, čo to má byť: štvorcový panelák, dlhý panelák s balkónmi,
+    panelák 5-7 poschodí, výškový panelák, obchod s plochou strechou, rodinný dom, garáže
+    alebo žiadna budova. Nastavíš aj počet poschodí.
+  - Režim základní: klikom pridáš základňu povstalcov (pravý klik zmaže) a nastavíš jej
+    počet budov, obranných veží, pešiakov a vozidiel.
+  - "Pregenerovať s úpravami" vytvorí mapu znova. Úpravy sa ukladajú k názvu mapy
+    a platia pri každom ďalšom generovaní tej istej mapy.
+  - Koliesko = zoom, pravé tlačidlo + ťahanie = posun.
+* NOVÉ: tlačidlo "Otvoriť vo World Builderi" po vygenerovaní (hľadá WorldBuilder.exe v priečinku hry).
+* Paneláky podľa skutočnej výšky z OSM (bez údaja 4 poschodia):
+  - do 4 poschodí: štvorcový pôdorys = AsiaApartment02 (jeden kus), podlhovastý = AsianApartmentSingle01,
+  - 5-7 poschodí: AsianApartment01,
+  - 8 a viac: CivilianHighrise01.
+  Štvorcový panelák už nikdy nie je poskladaný z dlhých blokov.
+* OPRAVA: automatické základne povstalcov už nestoja na mieste panelákov (predtým ich vyčistili).
+  Stavajú sa pri meste na voľnom priestranstve.
+
+
+v0.21.0  (8. 11. 2026)  -  Vlak, garáže, chodníky, silá
+------------------------------------------------------------
+* NOVÉ: jazdiaci vlak. Po najdlhšej trati na mape jazdí tam a späť, na staniciach z OSM zastaví a mosty
+  cez rieky prejde bez prepadnutia do vody. Prepínač v karte Mesto (predvolene zapnutý).
+* NOVÉ: garáže v rade (building=garages / garage a budovy v garážových areáloch) sa skladajú
+  z MogadishuGarage podľa skutočnej dĺžky radu.
+* NOVÉ: chodníky medzi panelákmi a cez parky (OSM footway, cycleway) ako úzky chodník. Chodníky
+  zakreslené popri ulici a priechody sa vynechajú, lebo patria k ulici. Chodníky neodtláčajú budovy.
+* NOVÉ: silá na družstvách (building=silo, man_made=silo): skupina síl = jedna OilRefinery.
+* Železničné stanice (building=train_station) sú jednoduché budovy s plochou strechou, nie paneláky.
+* Pri prvom generovaní sa oblasť stiahne z OSM znova (pribudli chodníky, stanice a silá).
+
+
+v0.20.0  (8. 11. 2026)  -  Budovy podľa skutočného tvaru, AI útočí, nové paneláky
+------------------------------------------------------------
+BUDOVY
+* NOVÉ: budovy sa skladajú podľa skutočného pôdorysu z OSM. Tvary L, U, H aj budovy s vnútorným
+  dvorom majú v hre rovnaký tvar ako v realite (kusy sa môžu prekrývať).
+* NOVÉ paneláky (podľa tvojich obrázkov z World Buildera):
+  - dlhé bytovky (napr. Sklárska v Poltári): rad AsianApartmentSingle01,
+  - bežný panelák: AsianApartment01, viac kusov vedľa seba,
+  - malá štvorcová bytovka: AsiaApartment02,
+  - vysoký panelák (9+ poschodí): rad CivilianHighrise01.
+  Do výšky sa poschodujú len AsiaApartment02 a AsianApartmentSingle01.
+* Vyradené: biely zdobený EuroHighrise2, kamenný SovietGovernmentBuildingSmall, StanSovietOffice.
+* Obchody, banky, pošty, kancelárie a budovy s plochou strechou: AsianApartmentUnit (plochá strecha)
+  namiesto hrázdených domov. GermanPub ostáva len pre krčmy so šikmou strechou.
+* Škola a iné veľké verejné budovy sa skladajú z panelových kusov podľa tvaru (napr. škola v tvare H).
+* NOVÉ: načítavajú sa aj budovy zakreslené v OSM ako multipolygón (veľké školy, továrne, budovy
+  s dvorom). Doteraz chýbali úplne.
+* Veľké obchody nad 900 m2 (supermarkety) sú haly.
+
+AI A NEPRIATELIA
+* OPRAVA: AI s veľkou armádou len stála a neútočila. Keď si AI za cieľ zvolila povstalcov, hľadala
+  útočnú trasu, ktorá neexistovala. Povstalci majú teraz vlastné číslo štartu a z každej základne
+  k nim vedú útočné trasy.
+* Útočné trasy AI vedú k základni každého hráča z každej inej základne (nielen z najvzdialenejšej).
+* OPRAVA: pevnosť povstalcov sa už nikdy nepostaví na štart hráča. Stavia sa čo najďalej od všetkých
+  hráčov. Voľba "Poloha" v menu zmizla.
+* Povstalci v domoch sú ďalej od základní, aby nezastrelili buldozér AI hneď na začiatku (to mohol byť
+  dôvod, prečo niektoré AI vôbec nestavali).
+
+IHRISKÁ
+* OPRAVA: futbalové bránky stoja oproti sebe na koncoch ihriska, otvorom k sebe.
+* Ihriská s umelým trávnikom, viacúčelové ihriská a ihriská s viacerými športami sa tiež berú
+  ako futbalové.
+
+* Pri prvom generovaní sa oblasť stiahne z OSM znova (pribudli budovy-multipolygóny).
+
+
+v0.19.0  (8. 11. 2026)  -  Povrch ciest z OSM, poschodovanie len panelákov
+------------------------------------------------------------
+* Do výšky sa poschodujú UŽ LEN dva hlavné paneláky: štvorcový vežiak (EuroHighrise2) a dlhý blok
+  s balkónmi (StanSovietOffice01/02). Radnice, obchody a iné budovy sa už nestavajú na seba.
+* NOVÉ: povrch ciest podľa OSM (značka surface):
+  - asfalt / betón -> asfaltová cesta (aj poľná cesta alebo chodník, ak je v OSM asfaltová),
+  - štrk -> štrková cesta, hlina / nespevnená -> poľná cesta,
+  - dlažba / mačacie hlavy -> dláždená ulica, dláždený chodník -> chodník,
+  - pešie zóny sa teraz kreslia tiež (ako široký chodník).
+  Ulice bez značky povrchu ostávajú asfaltové ako doteraz.
+* Pri prvom generovaní sa oblasť stiahne z OSM znova (pribudli nové údaje).
+
+
+v0.18.0  (8. 11. 2026)  -  Typ budov z OSM, ploty
+------------------------------------------------------------
+* Overture Maps odstránené: robilo z bežných domov obrie modely. Paneláky a domy sa vyberajú ako vo v0.16.4.
+* NOVÉ: typ budovy podľa OSM:
+  - krčma, reštaurácia, kaviareň, penzión v budove -> GermanPub,
+  - obchod, banka, pošta, lekáreň, kancelária -> obchodný dom (malý meštiansky dom, nie vežiak),
+  - škola, škôlka, obecný úrad, polícia, hasiči -> radnica / úrad,
+  - budovy na dvore statku -> stodoly a hospodárske budovy, v priemyselnom areáli -> haly,
+    v garážach a záhradkách -> kôlne,
+  - supermarket v obchodnej zóne -> hala.
+  Panelák s potravinami na prízemí ostáva panelákom.
+* NOVÉ: poistka proti obrím modelom: obchod, úrad, fabrika či statok dostane model len vtedy, ak sedí
+  na skutočný pôdorys, inak sa postaví obyčajný dom alebo kôlňa.
+* Z úradov vyradené modely nemocnice (TechHospital) a zdobený SovietGovernmentBuildingSmall.
+* NOVÉ: ploty, múry a živé ploty z OSM (karta Mesto): laťkový plot, pletivo, tehlový, kamenný
+  a betónový múr, živý plot. Nekreslia sa cez cesty a domy, max. 3000 kusov.
+
+
+v0.17.0  (8. 11. 2026)  -  Presnejšie budovy z Overture Maps
+------------------------------------------------------------
+* NOVÉ: budovy sa dopĺňajú dátami z Overture Maps (karta Mesto, predvolene zapnuté):
+  - výška a počet poschodí aj tam, kde ich OpenStreetMap nemá -> paneláky, vežiaky a rodinné domy sa
+    trafia podľa skutočnej výšky, vysoké bloky sa správne poschodujú,
+  - typ budovy (obchod, fabrika, škola, kostol, garáž, farma ...) pri budovách zakreslených len ako building=yes,
+  - tvar strechy,
+  - budovy, ktoré v OSM úplne chýbajú (obrysy z leteckých snímok), sa pridajú.
+* Model sa vyberá aj podľa strechy: šikmá strecha (sedlová, valbová ...) = dom alebo statok, nie panelák;
+  plochá strecha + 3 poschodia + hĺbka = menšia bytovka.
+* Sťahuje sa len výrez mapy (knižnica DuckDB, run.bat ju doinštaluje sama). Prvé stiahnutie oblasti trvá
+  1-5 minút, potom je v cache. Ak sa nepodarí, mapa sa vytvorí len z OSM ako doteraz.
+* Výpis na konci ukazuje, koľkým budovám sa doplnili údaje a koľko sa pridalo.
+
+
+v0.16.4  (8. 11. 2026)  -  Oprava bytoviek
+-------------------------------------------
+* OPRAVA: staré uložené nastavenie modelu bytoviek (napr. SovietBuilding) prebíjalo novú predvolenú voľbu
+  - nastavenie má nový kľúč, predvolene sa použijú paneláky z tvojich obrázkov.
+* Paneláky zakreslené v OSM len ako building=yes sa spoznajú podľa veľkosti a hĺbky (nad ~260 m², hĺbka nad 9 m)
+  alebo podľa 4 a viac poschodí a dostanú model panelákov, nie veľkého rodinného domu.
+* Rodinné domy už nedostávajú model stodoly (BarnShed ostáva len pri farmách).
+
+
+v0.16.3  (8. 11. 2026)  -  Tlačidlo vždy viditeľné
+---------------------------------------------------
+* Tlačidlo VYGENEROVAŤ MAPU je pevne dole v pravom paneli - karty ho už nevytlačia mimo obrazovky.
+* Karty s nastaveniami sa dajú posúvať (koliesko myši / posuvník vpravo).
+* Okno sa prispôsobí veľkosti obrazovky, výpis dole je vždy viditeľný.
+
+
+v0.16.2  (8. 11. 2026)  -  Oprava: zmiznuté stromy
+---------------------------------------------------
+* OPRAVA: hra vykreslí najviac 4000 stromov (limit enginu W3DTreeBuffer::MAX_TREES v zdrojovom kóde EA)
+  a ostatné zahodí. Stromy sa predtým ukladali les po lese od rohu mapy, takže pri vysokom limite všetky
+  viditeľné stromy skončili v prvom lese a inde neboli žiadne.
+* Teraz: najprv jednotlivé stromy a stromoradia z OSM a vŕby pri vode, potom stromy rovnomerne do VŠETKÝCH
+  lesov (okraje lesa majú prednosť, tam to vidno najviac), v náhodnom poradí.
+* Predvolený limit stromov 3900. Nad 4000 má zmysel len s enginom, ktorý tento limit zrušil.
+
+
+v0.16.1  (8. 11. 2026)  -  Bytovky podľa obrázka
+--------------------------------------------------
+* Predvolené bytovky = modely z tvojich screenshotov: dlhé bytovky = panelák s balkónmi
+  (StanSovietOffice01/02, skladaný za sebou), krátke a bodové = hranatá vežová bytovka (EuroHighrise2).
+  8-poschodový blok = 2 modely na sebe. Ostatné modely ostávajú na výber v karte Mesto.
+
+
+v0.16.0  (8. 11. 2026)  -  Hliadky, viac stromov a ľudí
+---------------------------------------------------------
++ Hliadky technicals: autá s guľometom povstalcov jazdia dookola po uliciach miest (0 - 60 hliadok).
+  Každá má uzavretú trasu z waypointov a skript ju na začiatku hry pošle na trasu (engine ju jazdí stále dokola).
++ Menšie základne povstalcov po mape (0 - 15) - v mestách aj mimo nich, každá s budovami, vežami a jednotkami.
++ Max. počet povstalcov sa zadáva číslom (predtým pevný limit 800).
++ Stromy: max. 300 000 (predtým 25 000), hustota lesa až 4x. Veľká mapa s lesmi potrebuje 100 000 - 250 000
+  stromov pre prirodzenú hustotu (test: 150 000 stromov na 5 x 5 km za 9 s).
++ Viac civilistov: posuvník množstva, civilisti chodia aj po chodníkoch, nie len pri domoch.
+
+
+v0.15.0  (8. 11. 2026)  -  Čistenie miest
+-------------------------------------------
++ Nový režim ČISTENIE MIEST (karta Nepriateľ, predvolene zapnutý): povstalci obsadia každý N-tý dom
+  (predvolene každý 3.) po 1 - 4 vojakoch (väčšinou 1 - 3); 3 obtiažnosti (rebeli / + RPG a teroristi /
+  + únoscovia áut); max. 800 povstalcov na mapu. Hráčske základne a ich okolie ostávajú voľné.
++ Povstalci sú samostatná strana mapy (overené v zdrojovom kóde hry od EA: skirmish ponechá iba strany
+  s frakciou FactionCivilian); skript mapy ich na začiatku nastaví ako nepriateľov všetkých hráčov
+  (player0 - player11, oboma smermi) a pošle ich do domov.
+* Pevnosť teraz patrí povstalcom (predtým bola neutrálna) - v strede mapy alebo na zvolenom štarte.
+* OPRAVA TEXTÚR: indexy dlaždíc sa počítajú presne ako vo World Builderi (4 poddlaždice na dlaždicu).
+  Predtým boli zle - asfalt sa zobrazoval ako tráva a terén mal hranaté štvorce.
++ Prelínanie textúr (mäkké prechody tráva / pole / les / cesta / betón) ako auto-blend vo World Builderi.
+* Rieky a jazerá: mäkké brehy namiesto schodovitých stien.
+* Futbalové bránky otočené k sebe.
+* Ázijské domčeky na stĺpoch (RiverHouse01) vyradené.
+* Menu: karty sa zmestia, posuvníky sú dobre viditeľné, širší panel nastavení.
++ Prepínač jazyka v hlavičke okna - celé menu sa prepne hneď, bez reštartu, nastavenia ostanú.
+
+
+v0.14.0  (8. 11. 2026)  -  Skutočné sklony terénu
+--------------------------------------------------
++ Nový režim terénu "Skutočné sklony" (predvolený): kopce, svahy a údolia do cca 900 m
+  majú skutočnú výšku 1:1 (test: 20 m kopec = 19,9 m v hre), zmenší sa len pomalé stúpanie
+  krajiny cez celú mapu, aby sa všetko zmestilo do 255 výškových krokov hry.
+* Výška využíva celý rozsah 0 - 255 (rezerva pod terénom pre rieky zmenšená zo 16 na 5 jednotiek):
+  pri 1:1 max. cca 38 m namiesto 35 m.
+i Limit 255 krokov je daný formátom .map (1 bajt na bod, krok 0,625 jednotky) - pri 1:1 = 0,16 m na krok.
+
+
+v0.13.0  (8. 11. 2026)  -  Angličtina a .exe
+---------------------------------------------
++ Celé rozhranie v angličtine (predvolené), slovenčina na výber (karta Export -> Language / Jazyk).
++ build_exe.bat postaví jeden súbor ZeroHourEarth.exe a zip pripravený na zdieľanie
+  (exe + anglický README + CHANGELOG).
++ Ikona programu.
++ Anglický README_EN.txt a CHANGELOG_EN.txt.
+
+
+v0.12.0  (8. 11. 2026)  -  Živý svet, rieky, pevnosť, obrovské mapy
+--------------------------------------------------------------------
++ Civilisti v obciach, zaparkované autá pri cestách (európske autá, dodávky, policajná dodávka).
++ Na poliach traktory, kombajny, vozy s koňom, seno; na lúkach voly.
++ Zvuky prostredia: vtáky v lese a na lúkach, ruch obce, rieka, jazero, zvon na cintoríne,
+  park; v noci sova, v zime vietor a vrany.
++ Experimentálne obrovské mapy až 2000 x 2000 dlaždíc (pri 1:1 až 5 x 5 km).
++ Nepriateľská pevnosť (experimentálne, karta Nepriateľ): predstavaná základňa GLA / Číny / USA
+  na štarte vybraného hráča - budovy, obranné veže a jednotky; 3 úrovne opevnenia.
+  Patrí AI hráčovi v rovnakom riadku lobby, ktorý musí mať rovnakú štartovú pozíciu.
+* Rieky: zapisujú sa ako skutočné rieky (ako World Builder / MapToPlay), po krátkych úsekoch
+  podľa spádu terénu - žiadne hlboké kaňony, voda max. cca 2 m hlboká, mierne brehy.
+* Riečne plochy z OSM (široké rieky) sa kreslia ako rieka, nie ako jedno ploché jazero cez celý svah.
+* Jazerá: hladina podľa brehu, nie podľa stredu jazera.
+* Mosty: opravené chýbajúce mosty - v OSM je most samostatný kúsok cesty nad vodou,
+  teraz sa správne predĺži na suchý breh na oboch stranách; duplicitné mosty sa vynechajú.
+i Čierne neprebádané územie (shroud) má Zero Hour v skirmish zapnuté samo - funguje aj na týchto mapách.
+
+
+v0.11.0  (8. 11. 2026)  -  Až 12 hráčov
+----------------------------------------
++ Počet hráčov 2 - 12 (pri 9 - 12 hráčoch pribudne vnútorný kruh štartov).
+  Pozor: hra bez úprav ukáže v skirmish max. 8 hráčov; 9 - 12 len s úpravou hry, ktorá to podporuje.
++ Ručné rozmiestnenie na mape až pre 12 hráčov (12 farieb).
++ AI trasy (Center / Flank / Backdoor) pre všetkých 12 hráčov.
+* Základne sa už nikdy neprekrývajú (pri "dva tímy" sa veľký tím rozdelí do 2 radov).
+
+
+v0.10.0  (8. 11. 2026)  -  Lepšie cesty a výber bytoviek
+---------------------------------------------------------
+* Križovatky: body, kde sa cesty stretávajú, sa už pri zjednodušovaní nevyhadzujú,
+  takže hra spojí bočnú ulicu s hlavnou do križovatky (T / X) namiesto rozpojených úsekov.
+* Zdvojené cesty: cesta, ktorá leží takmer celá na už položenej ceste (cesta v OSM zakreslená
+  zvlášť pre každý smer jazdy, duplikáty), sa vynechá.
+* Uličky na parkoviskách, príjazdy k domom a podobné drobné cestičky sa nekreslia.
+* Asfalt pod cestou je užší ako cesta, takže po okrajoch netrčia hranaté kúsky dlaždíc.
+* Pri moste cez rieku ostávajú zachované aj križovatky na tej istej ceste.
++ Výber modelu bytoviek (karta Mesto): hranatý panelák (predvolený), panelák s balkónmi,
+  dlhý zdobený blok, vysoký dom, malá bytovka alebo automatický mix.
+
+
+v0.9.0  (8. 11. 2026)  -  Rýchlejšie sťahovanie
+--------------------------------------------------
++ Projekt premenovaný na Zero Hour Earth, číslo verzie v okne programu.
++ OpenStreetMap sa sťahuje jednou požiadavkou (pre oblasť do 5 km) namiesto 4 častí.
++ Pýta sa 3 serverov Overpass naraz a použije prvú úplnú odpoveď.
++ Ak je server preťažený (HTTP 429/504), okamžite sa skúsi ďalší.
++ Program si pamätá najrýchlejší server a nabudúce sa ho pýta ako prvého.
++ Výškové dlaždice terénu sa sťahujú paralelne (8 naraz).
+
+
+v0.8.0  -  Nové menu a AI trasy
+---------------------------------
++ Nový tmavý vzhľad okna: mapa vľavo, nastavenia v kartách vpravo.
++ Karty Oblasť / Hráči / Krajina / Mesto / Export / Náhľad.
++ AI trasy pre botov: Center, Flank a Backdoor pre každého hráča (ako vo World Builderi).
++ Ročné obdobie: leto, jeseň (farebné duby), zima (zasnežené stromy).
++ Denná doba: ráno, poludnie, večer, noc (osvetlenie v hre).
++ Posuvníky: zvýraznenie kopcov, vyhladenie terénu, priestor pre základňu, počet ropných veží,
+  hustota lesa, max. počet stromov, hustota domov.
++ Zapnutie/vypnutie: kríky, vŕby, kôlne, detaily, lampy, autá, AI trasy.
++ Náhodné semienko (iné rozmiestnenie stromov a variácie domov).
++ Náhľad hotovej mapy a štatistika priamo v okne, voliteľné otvorenie priečinka mapy.
++ Program si pamätá všetky nastavenia, oblasť aj ručné štarty.
+
+
+v0.7.0  -  Hráči a paneláky
+-----------------------------
++ Počet hráčov 2 - 8.
++ Rozmiestnenie štartov: automaticky, do kruhu, dva tímy proti sebe, ručne klikaním na mapu.
++ Množstvo zdrojov: málo / normálne / veľa.
++ Dlhé bytovky sa skladajú z rovnakých dielov tesne vedľa seba (napr. 8-vchodový panelák).
++ Vysoké budovy: rovnaký model poschodovaný 2 - 3x na sebe podľa výšky z OSM (experimentálne).
++ Nastavenie poschodí pre bytovky, ktoré v OSM nemajú uvedený počet poschodí.
+* Prístupové cesty medzi domami (OSM "service") sú asfaltové namiesto poľných.
+* Model budovy sa vyberá aj podľa výšky a hĺbky skutočnej budovy.
+
+
+v0.6.0  -  Európske detaily
+-----------------------------
++ Benzínky: GasStation + asfaltová príjazdová cesta k najbližšej ceste.
++ Futbalové ihriská: bránky, tribúna, trávnatá plocha.
++ Kostoly (náhrada GermanTownHall s vežou - hra nemá európsky kostol) + socha anjela.
++ Cintoríny s náhrobkami a kryptou, detské ihriská, parky s lavičkami a fontánou,
+  parkoviská s autami, autobusové zastávky, pouličné lampy v zastavanej časti.
++ Železnice (koľaje, cez rieku most).
++ Husté lesy z 48 európskych drevín podľa typu lesa v OSM (ihličnatý / listnatý / zmiešaný),
+  kríky na okrajoch lesa, vŕby pri vode, jednotlivé stromy a stromoradia z OSM.
+* Projekt zameraný len na Európu.
+* Viac domov: ak sa najlepší model nezmestí, skúsia sa ďalšie; domy môžu stáť bližšie k ceste.
+* Širší asfalt pod cestami, aby ich neprekrývala tráva.
+
+
+v0.5.0  -  Minimapa a náhľad v menu
+-------------------------------------
++ Náhľad mapy v menu skirmish (súbor <mapa>.tga) - predtým sa zobrazoval otáznik.
++ Pod cestami asfalt / hlina / dlažba a pod budovami betón, takže cesty a mesto vidno na minimape.
+
+
+v0.4.0  -  Hrateľnosť
+-----------------------
++ Mosty cez rieky a potoky (európske mosty, drevené pri poľných cestách).
+* Európske budovy namiesto blízkovýchodných (nemecké domy, chalety, sovietske bloky).
+* Veľký vyrovnaný priestor pre základne, aby AI mala kde stavať.
+* Výraznejší terén - využíva celý výškový rozsah hry, 3 režimy výšky.
+
+
+v0.3.0  -  Mierka 1:1
+-----------------------
++ Pevná mierka 1:1 (1 dlaždica = 2,5 m), veľkosť mapy sa počíta z vybranej oblasti.
++ Mierky 1:2 a 1:4 pre väčšie oblasti.
+* Spoľahlivejšie sťahovanie OSM (kratšie čakanie, 4 servery, výpis príčiny chyby).
+
+
+v0.2.0  -  Výber oblasti na mape
+----------------------------------
++ Mapa OpenStreetMap v okne programu, výber oblasti myšou, hľadanie miesta.
+* run.bat si sám nainštaluje Python, ak chýba.
+
+
+v0.1.0  -  Prvá verzia
+------------------------
++ Čítanie a zápis .map súborov Zero Hour.
++ Budovy načítané priamo z INIZH.big hry.
++ Cesty, budovy, voda a lesy z OpenStreetMap, terén z verejných výškových dlaždíc.
++ 4 štartovacie pozície, Supply Docks, ropné veže.

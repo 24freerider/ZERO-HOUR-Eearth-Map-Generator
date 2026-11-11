@@ -1,2 +1,11 @@
-# ZERO-HOUR-Eearth-Map-Generator
-ZERO HOUR EARTH is a Windows map generator for Command &amp; Conquer: Generals – Zero Hour. Pick a real-world location and turn it into a playable skirmish map using OpenStreetMap data and real elevation. Game Mods included
+# Zero Hour Earth
+
+Zero Hour Earth generates playable skirmish maps for Command & Conquer: Generals – Zero Hour from OpenStreetMap features and real elevation data.
+
+## Run on Windows
+
+Open `run.bat`, select an area, configure the map, and click **Generate Map**. The generator needs an internet connection. Restart the game and select the exported map in Skirmish.
+
+- [English guide](README_EN.txt) · [Slovenský návod](README_SK.txt)
+- [English changelog](CHANGELOG_EN.txt) · [Slovenské poznámky k verziám](CHANGELOG_SK.txt)
+- [Developer notes](DEVELOPERS.txt)

@@ -1,5 +1,5 @@
 """All internet access: Nominatim, Overpass (OpenStreetMap) and public elevation tiles."""
-import hashlib, io, json, math, os, time
+import hashlib, io, json, math, os, tempfile, time
 import numpy as np
 
 UA = {'User-Agent': 'ZeroHourEarth/0.51.2 (hobby Zero Hour map generator)'}
@@ -14,6 +14,31 @@ DEM_URL = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.p
 def _cache_path(key, ext):
     os.makedirs(CACHE, exist_ok=True)
     return os.path.join(CACHE, hashlib.sha1(key.encode()).hexdigest() + ext)
+
+
+def _write_atomic(path, data, mode='wb'):
+    """Publish a complete cache entry after writing to a unique temporary file."""
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(mode=mode, dir=os.path.dirname(path) or '.',
+                                         suffix='.part', delete=False) as temporary:
+            temporary_path = temporary.name
+            temporary.write(data)
+        for attempt in range(5):
+            try:
+                os.replace(temporary_path, path)
+                break
+            except PermissionError as error:
+                if getattr(error, 'winerror', None) not in (5, 32) or attempt == 4:
+                    raise
+                time.sleep(0.02 * (attempt + 1))
+        temporary_path = None
+    finally:
+        if temporary_path is not None:
+            try:
+                os.unlink(temporary_path)
+            except FileNotFoundError:
+                pass
 
 
 def geocode(query):
@@ -298,8 +323,13 @@ def fetch_osm(bbox, log=print, max_tile_km=5.5):
     key, parts = _osm_key(bbox, max_tile_km)
     cp = _cache_path(key, '.json')
     if os.path.exists(cp):
-        log('  OSM z cache.')
-        return parse_osm(json.load(open(cp)))
+        try:
+            with open(cp) as cached:
+                data = json.load(cached)
+            log('  OSM z cache.')
+            return parse_osm(data)
+        except ValueError:
+            log('  cache OSM je poškodená - sťahujem znova')
     elements = {}
     for i in range(parts):
         for j in range(parts):
@@ -323,7 +353,7 @@ def fetch_osm(bbox, log=print, max_tile_km=5.5):
                 else:
                     elements[k] = el
     data = {'elements': list(elements.values())}
-    json.dump(data, open(cp, 'w'))
+    _write_atomic(cp, json.dumps(data), 'w')
     return parse_osm(data)
 
 
@@ -579,7 +609,7 @@ class DemSampler:
                 try:
                     r = requests.get(DEM_URL.format(z=self.z, x=x, y=y), headers=UA, timeout=30)
                     if r.status_code == 200:
-                        open(cp, 'wb').write(r.content)
+                        _write_atomic(cp, r.content)
                         return xy, r.content
                 except Exception:
                     pass

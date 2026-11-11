@@ -76,7 +76,7 @@ class Catalog:
 
 # ---------------- raising the game's road limit (loose Data\INI\GameData.ini, like a mod) ----------------
 MARK = '; Zero Hour Earth: raised road limits'
-ROAD_LIMITS = {'MaxRoadSegments': 200000, 'MaxRoadVertex': 100000, 'MaxRoadIndex': 200000}   # GeneralsX: practically unlimited
+ROAD_LIMITS = {'MaxRoadSegments': 200000, 'MaxRoadVertex': 65531, 'MaxRoadIndex': 65531}   # GeneralsX: segments practically unlimited; vertex/index buffers are 16-bit, the game clamps them to 65531
 
 
 def loose_gamedata(game_dir):

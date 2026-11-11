@@ -313,6 +313,7 @@ EN = {
     'Limit ciest v hre je zvýšený na ': 'The road limit in the game is raised to ',
     '.\n\nPlatí po reštarte hry. Skirmish proti AI funguje normálne, ale online hra s hráčmi, ktorí limit nemajú, nahlási nezhodu - vtedy ho vráť späť.': '.\n\nRestart the game. Skirmish against the AI works normally, but an online game with players who do not have the limit reports a mismatch - restore it then.',
     'Pôvodný GameData.ini je obnovený.': 'The original GameData.ini is restored.',
+    '\n\nUpravený GameData.ini mení dáta hry: s ním sa nepripojíš k hráčom, ktorí ho nemajú (online hra). Tlačidlom na vrátenie limitu ho odstrániš.': '\n\nThe modified GameData.ini changes the game data: with it you cannot join players who do not have it (online play). The restore-limit button removes it.',
     'Limit ciest je vrátený na pôvodný.': 'The road limit is back to the original.',
     'Nebolo čo vracať.': 'There was nothing to restore.',
     'Zvýšiť limit ciest v hre (40 000)': 'Raise the road limit in the game (40,000)',

@@ -16,6 +16,12 @@ def _cache_path(key, ext):
     return os.path.join(CACHE, hashlib.sha1(key.encode()).hexdigest() + ext)
 
 
+def _write_atomic(path, data, mode='wb'):
+    """Write to path.part, then rename: an interrupted download never leaves a half-written cache file behind."""
+    with open(path + '.part', mode) as f: f.write(data)
+    os.replace(path + '.part', path)
+
+
 def geocode(query):
     import requests
     r = requests.get('https://nominatim.openstreetmap.org/search',
@@ -297,8 +303,12 @@ def fetch_osm(bbox, log=print, max_tile_km=5.5):
     key, parts = _osm_key(bbox, max_tile_km)
     cp = _cache_path(key, '.json')
     if os.path.exists(cp):
-        log('  OSM z cache.')
-        return parse_osm(json.load(open(cp)))
+        try:
+            data = json.load(open(cp))
+            log('  OSM z cache.')
+            return parse_osm(data)
+        except ValueError:
+            log('  cache OSM je poškodená - sťahujem znova')
     elements = {}
     for i in range(parts):
         for j in range(parts):
@@ -322,7 +332,7 @@ def fetch_osm(bbox, log=print, max_tile_km=5.5):
                 else:
                     elements[k] = el
     data = {'elements': list(elements.values())}
-    json.dump(data, open(cp, 'w'))
+    _write_atomic(cp, json.dumps(data), 'w')
     return parse_osm(data)
 
 
@@ -578,7 +588,7 @@ class DemSampler:
                 try:
                     r = requests.get(DEM_URL.format(z=self.z, x=x, y=y), headers=UA, timeout=30)
                     if r.status_code == 200:
-                        open(cp, 'wb').write(r.content)
+                        _write_atomic(cp, r.content)
                         return xy, r.content
                 except Exception:
                     pass

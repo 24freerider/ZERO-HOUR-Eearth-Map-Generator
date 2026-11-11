@@ -271,8 +271,9 @@ def _post(q, log, parallel=3):
         pool.shutdown(wait=False, cancel_futures=True)
         if result is not None:
             return result
-        log('  Všetky servery sú preťažené, skúšam znova o 15 s ...')
-        time.sleep(15)
+        if attempt < 2:
+            log('  Všetky servery sú preťažené, skúšam znova o 15 s ...')
+            time.sleep(15)
     raise RuntimeError('OpenStreetMap (Overpass) sa nepodarilo stiahnuť:\n' + '\n'.join(str(e) for e in errors[-4:]))
 
 

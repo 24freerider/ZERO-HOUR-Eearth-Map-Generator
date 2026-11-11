@@ -1,5 +1,5 @@
 """All internet access: Nominatim, Overpass (OpenStreetMap) and public elevation tiles."""
-import hashlib, io, json, math, os, time
+import hashlib, io, json, math, os, tempfile, time
 import numpy as np
 
 UA = {'User-Agent': 'ZeroHourEarth/0.51.2 (hobby Zero Hour map generator)'}
@@ -17,9 +17,21 @@ def _cache_path(key, ext):
 
 
 def _write_atomic(path, data, mode='wb'):
-    """Write to path.part, then rename: an interrupted download never leaves a half-written cache file behind."""
-    with open(path + '.part', mode) as f: f.write(data)
-    os.replace(path + '.part', path)
+    """Publish a complete cache entry after writing to a unique temporary file."""
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(mode=mode, dir=os.path.dirname(path) or '.',
+                                         suffix='.part', delete=False) as temporary:
+            temporary_path = temporary.name
+            temporary.write(data)
+        os.replace(temporary_path, path)
+        temporary_path = None
+    finally:
+        if temporary_path is not None:
+            try:
+                os.unlink(temporary_path)
+            except FileNotFoundError:
+                pass
 
 
 def geocode(query):
@@ -304,7 +316,8 @@ def fetch_osm(bbox, log=print, max_tile_km=5.5):
     cp = _cache_path(key, '.json')
     if os.path.exists(cp):
         try:
-            data = json.load(open(cp))
+            with open(cp) as cached:
+                data = json.load(cached)
             log('  OSM z cache.')
             return parse_osm(data)
         except ValueError:

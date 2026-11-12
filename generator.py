@@ -26,11 +26,13 @@ from g_insurgents import InsurgentsMixin
 from g_zini import ZombieIniMixin
 from g_zmode import ZombieModesMixin
 from g_invasion import InvasionMixin, INVASION_NUMBERS, INVASION_ROSTERS
+from g_broyale import BattleRoyaleMixin
+from g_brsettings import BR_SETTINGS
 from g_output import OutputMixin
 
 
 class Gen(TerrainMixin, RoadsMixin, BuildingsMixin, BasesMixin, NatureMixin, InsurgentsMixin,
-          ZombieIniMixin, ZombieModesMixin, InvasionMixin, OutputMixin):
+          ZombieIniMixin, ZombieModesMixin, InvasionMixin, BattleRoyaleMixin, OutputMixin):
     def __init__(self, osm, elev_fn, proj, tiles, catalog, template_path, style=None, seed=1, log=print,
                  terrain_mode='strong', players=4, layout='auto', manual_starts=None, resources='normal',
                  stack_tall=True, apt_levels=4, **kw):
@@ -47,7 +49,7 @@ class Gen(TerrainMixin, RoadsMixin, BuildingsMixin, BasesMixin, NatureMixin, Ins
         self.AREA = self.AX           # east-west size (kept for the editor); use AX / AY in new code
         self.terrain_mode = terrain_mode
         self.players = max(2, min(MAX_PLAYERS, int(players)))
-        self.layout, self.manual_starts = (layout if layout not in ('zsurv', 'invasion') else 'auto'), manual_starts or []
+        self.layout, self.manual_starts = (layout if layout not in ('zsurv', 'invasion', 'battle_royale') else 'auto'), manual_starts or []
         if self.layout == 'manual' and len(self.manual_starts) >= 2:
             self.players = min(MAX_PLAYERS, len(self.manual_starts))
         self.multi = False         # a game mode with several people (see below)
@@ -67,8 +69,10 @@ class Gen(TerrainMixin, RoadsMixin, BuildingsMixin, BasesMixin, NatureMixin, Ins
                  ins_qrf=True, missions=False, mission_reward=5000, mode_zsurvival=False, zs_start_money=2000, zd_start_money=5000,
                  zs_respawn=60, zs_bounty=10, zombie_growing=False, zombie_growth=None, mode_zdefense=False,
                  zombie_rate=2, zombie_pacing='waves', zombie_live_limit=ZOMBIE_DEFAULT_LIVE_LIMIT,
-                 mode_invasion=False, invasion_faction='China', invasion_air=True, compact=True, light=False)
+                 mode_invasion=False, invasion_faction='China', invasion_air=True,
+                 mode_battle_royale=False, compact=True, light=False)
         o.update({key: bounds[0] for key, bounds in INVASION_NUMBERS.items()})
+        o.update({key: spec[0] for key, spec in BR_SETTINGS.items()})
         o.update({k: v for k, v in kw.items() if v is not None})
         if o['light']:
             # LIGHT = for the classic 32-bit game (GeneralsOnline / Steam): far fewer objects and units, roads kept
@@ -82,6 +86,17 @@ class Gen(TerrainMixin, RoadsMixin, BuildingsMixin, BasesMixin, NatureMixin, Ins
         # ZombieSurvival: no bases, one shop vehicle per player, growing zombies and targeted respawn.
         # It runs on the Zombie machinery (GLA AI = zombie master); the town has no insurgents at all.
         # ZombieSurvival Defense = ZombieSurvival + a nuclear silo in the centre that must not fall
+        self.battle_royale = bool(o['mode_battle_royale'])
+        if self.battle_royale:
+            for key, (default, minimum, maximum, _, _) in BR_SETTINGS.items():
+                if isinstance(default, bool):
+                    o[key] = str(o[key]).lower() in ('true', '1', 'yes')
+                else:
+                    o[key] = min(maximum, max(minimum, int(o[key])))
+            o.update(mode_invasion=False, mode_clearance=False, mode_zombie=False, mode_zsurvival=False,
+                     mode_zdefense=False, insurgents=False, fortress=False, outposts=0, patrols=0,
+                     foot_patrols=0, ins_qrf=False, ins_bases=None, ai_paths=False, train=False,
+                     cars=False, traffic=False, civilians=False, farm_life=False, black_map=True)
         self.invasion = bool(o['mode_invasion'])
         if self.invasion:
             o.update(mode_clearance=False, mode_zombie=False, mode_zsurvival=False, mode_zdefense=False,
@@ -98,8 +113,11 @@ class Gen(TerrainMixin, RoadsMixin, BuildingsMixin, BasesMixin, NatureMixin, Ins
             o.update(mode_zombie=True, mode_clearance=False, insurgents=False, fortress=False, outposts=0,
                      patrols=0, foot_patrols=0, ins_qrf=False, ins_bases=None)
         # game modes: you start in the middle of the town, one dormant AI slot keeps the game running
-        self.game_mode = bool(o['mode_clearance'] or o['mode_zombie'] or self.invasion)
-        if self.invasion:
+        self.game_mode = bool(o['mode_clearance'] or o['mode_zombie'] or self.invasion or self.battle_royale)
+        if self.battle_royale:
+            self.players = max(2, min(MAX_PLAYERS, int(players)))
+            self.humans, self.layout = self.players, 'battle_royale'
+        elif self.invasion:
             self.players = max(2, min(MAX_PLAYERS, int(players)))
             self.humans = self.players - 1
             self.layout = 'invasion'
@@ -280,10 +298,10 @@ class Gen(TerrainMixin, RoadsMixin, BuildingsMixin, BasesMixin, NatureMixin, Ins
         self.place_bases()
         if self.central_tunnel:
             self.place_zombie_tunnel()
-        if not self.invasion:
+        if not (self.invasion or self.battle_royale):
             self.place_resources()
         occ_before = self.occ.copy()
-        for x, y in () if self.invasion else self.starts:   # Invasion's starts are hidden, so don't reserve them
+        for x, y in () if self.invasion or self.battle_royale else self.starts:
             self.occ_poly(self.rect(x, y, self.base_clear, self.base_clear, 0), True)
         if self.zsurv:             # the vehicles' ring in the town centre (Defense: round the silo): a free square,
             ns = min(MAX_PLAYERS, max(8, self.humans + 1))   # so no Humvee spawns inside a house (dense cities)
@@ -336,14 +354,22 @@ class Gen(TerrainMixin, RoadsMixin, BuildingsMixin, BasesMixin, NatureMixin, Ins
             log('Detaily (cintoríny, ihriská, zastávky, lampy) ...'); self.place_details()
         else:
             self.area_polys = []
+        if self.battle_royale:
+            # Reserve drops and civilian units before adding trees and other scenery.
+            self.next_wp = len(self.starts)
+            self.br_layout()
+            br_wp_end = self.next_wp
         log('Stromy ...'); self.place_trees()
         self.place_nature_details()
         if any(self.opt[k] for k in ('civilians', 'traffic', 'farm_life', 'sounds')):
             log('Oživenie (civilisti, autá, zvieratá, zvuky) ...'); self.place_life()
         self.emit_roads()
         self.links = []
-        self.build_ai_paths()
-        self.build_script_areas()
+        if self.battle_royale:
+            self.next_wp = br_wp_end
+        else:
+            self.build_ai_paths()
+            self.build_script_areas()
         self.build_patrols()
         self.build_railroad()
         self.build_spawn_points()
@@ -385,7 +411,9 @@ class Gen(TerrainMixin, RoadsMixin, BuildingsMixin, BasesMixin, NatureMixin, Ins
         m.blend = BlendTile(WX, WY, self.tiles.ravel().tolist(), self.blend_arr.ravel().tolist(), [0] * (WX * WY),
                             [0] * (WX * WY), bt.dump())
         m.objects = self.objs
-        if self.invasion:
+        if self.battle_royale:
+            self.br_write_sides(m)
+        elif self.invasion:
             self.write_invasion_sides(m)
         elif self.opt['insurgents'] or self.opt['fortress'] or int(self.opt['outposts']) > 0 or self.opt['ins_bases'] \
                 or getattr(self, 'patrols', []) or self.game_mode or self.opt['black_map']:

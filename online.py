@@ -201,7 +201,10 @@ def _query(s, w, n, e):
  way["natural"="scrub"]({bb});
  node["leisure"="playground"]({bb});
  node["highway"="bus_stop"]({bb});
- node["railway"~"^(station|halt)$"]({bb});
+ nwr["railway"~"^(station|halt)$"]({bb});
+ nwr["amenity"~"^(bus_station|marketplace)$"]({bb});
+ nwr["place"="square"]({bb});
+ way["highway"="pedestrian"]["area"="yes"]({bb});
  node["man_made"="silo"]({bb});
  way["man_made"="silo"]({bb});
  node["amenity"="place_of_worship"]({bb});
@@ -302,7 +305,7 @@ def _post(q, log, parallel=3):
     raise RuntimeError('OpenStreetMap (Overpass) sa nepodarilo stiahnuť:\n' + '\n'.join(str(e) for e in errors[-4:]))
 
 
-OSM_VER = 18        # bump when _query() changes (the cache key)
+OSM_VER = 19        # bump when _query() changes (the cache key)
 
 
 def _osm_key(bbox, max_tile_km=5.5):
@@ -455,6 +458,25 @@ def parse_osm(data):
     o = OSM()
     for el in data['elements']:
         tags = el.get('tags', {})
+        public_space = (tags.get('place') == 'square' or
+                        tags.get('amenity') == 'marketplace' or
+                        (tags.get('highway') == 'pedestrian' and tags.get('area') == 'yes'))
+        if public_space:
+            if 'lat' in el:
+                o.points.append(('square', el['lat'], el['lon']))
+            else:
+                geometries = ([el.get('geometry', [])] if el['type'] == 'way' else
+                              [m.get('geometry', []) for m in el.get('members', []) if m.get('role') == 'outer'])
+                for ring in _merge_rings([_ring_from(g) for g in geometries if g]):
+                    o.areas.append(('square', ring))
+        if (tags.get('amenity') == 'bus_station' or tags.get('building') == 'train_station'
+                or el['type'] != 'node' and tags.get('railway') in ('station', 'halt')):
+            if 'lat' in el:
+                o.points.append(('station', el['lat'], el['lon']))
+            elif el.get('geometry'):
+                ring = _ring_from(el['geometry'])
+                if ring:
+                    o.points.append(('station', *(sum(axis) / len(axis) for axis in zip(*ring))))
         if tags.get('amenity') == 'fuel':
             if el['type'] == 'node' and 'lat' in el:
                 o.fuel.append((el['lat'], el['lon']))

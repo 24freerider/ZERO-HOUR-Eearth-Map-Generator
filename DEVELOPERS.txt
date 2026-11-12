@@ -27,7 +27,7 @@ FILES
                 fortress / outposts, buildings, insurgents, fences, details, trees, life, AI paths, patrols,
                 train, textures, scripts). Gen is assembled from topic modules (mixins):
                 gconst.py (constants, model tables - building models, styles and tunables live here),
-                g_terrain, g_roads, g_buildings, g_bases, g_nature, g_insurgents, g_zini, g_zmode, g_invasion, g_output.
+                g_terrain, g_roads, g_buildings, g_bases, g_nature, g_insurgents, g_zini, g_zmode, g_invasion, g_broyale, g_brini, g_output.
   mapio.py      Reads / writes the .map format ("CkMp" chunk files): height map, texture tiles and blends,
                 objects with property dictionaries, sides / teams, scripts, triggers, waypoint links.
                 MapFile.read(p).write(q) reproduces a file byte for byte.
@@ -102,3 +102,18 @@ DATA AND CREDITS
   Map tiles in the area picker: tile.openstreetmap.org (please respect its usage policy).
   Command & Conquer Generals: Zero Hour is (c) Electronic Arts; no game files are included - the program reads
   them from your own installation.
+
+BATTLE ROYALE
+  python app.py --cli "Bratislava" --km 2 --scale 2 --battle-royale --players 32 --game "C:\Games\Zero Hour" --out "C:\maps"
+  Offline generator check: python selftest_battle_royale.py "C:\Games\Zero Hour"
+
+  The generator finds clear, dry drop sites with a strict pairwise minimum, and keeps
+  each opening rebel outside a second minimum radius. Maps without enough eligible
+  ground fail generation rather than reducing these thresholds. Three match patterns
+  change both the drop assignment and the final safe zone. The zone is defined by nested
+  rectangles on a grid, with a continuous cover of overlapping radiation circles outside;
+  damage may extend slightly inside a nominal boundary along the outer edge of a cell.
+  The built-in cash bounty pays 12.5% of a destroyed enemy's value, including exactly
+  $50 for a street rebel. Other enemy kills can also pay smaller stock-engine bounties.
+  The optional bots only hunt; vehicle claims, shopping and zone navigation are designed
+  for human players. No controller lobby slot is needed.

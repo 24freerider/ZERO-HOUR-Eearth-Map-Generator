@@ -1,4 +1,4 @@
-ZERO HOUR EARTH v0.53.5
+ZERO HOUR EARTH v0.53.29
 =======================
 Real-world map generator for C&C Generals: Zero Hour.
 Pick any place on Earth, and the program builds a playable skirmish map from
@@ -73,3 +73,28 @@ Fan-made tool, not affiliated with EA. Command & Conquer is a trademark of Elect
 SOURCE CODE
   The full Python source is in the "source" folder (or next to this file). Read DEVELOPERS.txt for how to run it,
   what each file does and how the generator works.
+ BATTLE ROYALE
+   From Game Modes, open the separate Battle Royale page and enable the mode
+   (or pass --battle-royale on the command line).
+   Set 2 to 32 slots on the Players tab. Use the same GeneralsX build on every PC.
+   Host the exported map as free-for-all and leave unused slots closed. No controller AI is needed.
+   Keep map.ini and map.str next to the .map file. For a 32-slot map, start with a large urban area.
+
+   The page lets you edit character stats, upgrade prices, ability costs and damage,
+   zone phases and radiation, population, rewards and elite crates. Values save with profiles.
+   Each player gets one faction rifleman. Check the minimap to locate your unit.
+   Civilians and farmers drop cash to pick up. You can set up to 2,000 civilians,
+   1,200 rebels and 500 civilian vehicles. Civilian cars appear by roads, parking lots and starts.
+   Board a neutral vehicle for free. A civilian car returns to neutral after the
+   last passenger leaves unless you buy it from its command panel. Purchased cars
+   can scout without passengers. Three Nuke Trucks are placed by default.
+   Up to 64 Humvees are placed separately. Elite salvage crates stay where they land,
+   even after the zone shrinks. Walk over one with your hero to gain one rank, up to Heroic.
+   The radar marker refreshes while the crate is on the ground.
+   Open WEAPONS to buy the RPG or sniper rifle and equip it using the same slot.
+   Ability Shop is below WEAPONS. Open Killstreaks to buy and target Precision
+   Airstrike or Cluster Strike. Buy and place each C4 charge
+   separately. Up to five can be planted before detonating them together.
+   The countdown shows when the next radioactive zone closes. Infantry recover after
+   the configured delay without damage. The last player with infantry wins.
+

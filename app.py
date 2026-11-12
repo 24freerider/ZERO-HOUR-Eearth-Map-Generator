@@ -1,12 +1,13 @@
 """Zero Hour Earth - generates real-world Zero Hour skirmish maps from OpenStreetMap + elevation data."""
 
 APP_NAME = 'Zero Hour Earth'
-VERSION = '0.53.5'
+VERSION = '0.53.29'
 import math, os, random, re, subprocess, sys, threading, traceback
 
 import catalog, editor, generator, online, preflight, tr
 from tr import T
 from geo import Proj
+from g_brsettings import BR_GROUPS, migrate_br_settings
 from g_invasion import INVASION_NUMBERS, INVASION_ROSTERS
 
 HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
@@ -22,7 +23,8 @@ CLASSIC_MAX_TILES = 1000      # classic 32-bit game: max 2.5 x 2.5 km at 1:1
 LAYOUT_OPTS = {'Automaticky (rohy, potom strany)': 'auto', 'Do kruhu': 'circle',
                'Dva tímy proti sebe (západ vs. východ)': 'teams',
                'Dva tímy proti sebe (sever vs. juh)': 'teams_ns', 'Ručne na mape (klikaním)': 'manual',
-               'Zombie Survival (automaticky)': 'zsurv', 'Invasion (automaticky)': 'invasion'}
+               'Zombie Survival (automaticky)': 'zsurv', 'Invasion (automaticky)': 'invasion',
+               'Battle Royale (automaticky)': 'battle_royale'}
 RES_OPTS = {'Málo': 'low', 'Normálne': 'normal', 'Veľa': 'high'}
 ZOMBIE_PACING = {'Vlny': 'waves', 'Sústavne': 'continuous'}
 TERRAIN_OPTS = {'Skutočné sklony (kopce 1:1, celkové stúpanie zmenšené)': 'slopes', 'Výrazný (kopce zvýraznené)': 'strong', 'Skutočná výška (vrcholy stlačené)': 'real',
@@ -42,12 +44,14 @@ def safe_name(s):
     return (s or 'Earth')[:40]
 
 
-def map_folder_name(name, clearance=False, zombie=False, zsurv=False, zdef=False, light=False, invasion=False):
+def map_folder_name(name, clearance=False, zombie=False, zsurv=False, zdef=False, light=False, invasion=False,
+                    battle_royale=False):
     """Folder / file name of the generated map: game modes go into a bracket, like "[ZOMBIE SURVIVAL] Poltar"."""
     tags = [t for t, on in (('CLEARANCE', clearance), ('ZOMBIE', zombie)) if on]
     if zsurv: tags = ['ZOMBIE SURVIVAL']
     if zdef: tags = ['ZOMBIE DEFENSE']
     if invasion: tags = ['INVASION']
+    if battle_royale: tags = ['BATTLE ROYALE']
     if light: tags.append('LIGHT')
     return f"[{'+'.join(tags)}] {name}" if tags else name
 
@@ -136,7 +140,8 @@ def run_generation(place, area_km, tiles, game_dir, maps_dir, log=print, center=
     # game modes go into the name, like "[zombies] wheel of death": the skirmish list shows the file name
     base_name = name                     # editor choices belong to the place, whatever the game mode
     name = map_folder_name(name, opts.get('mode_clearance'), opts.get('mode_zombie'), opts.get('mode_zsurvival'),
-                           opts.get('mode_zdefense'), opts.get('light'), opts.get('mode_invasion'))
+                           opts.get('mode_zdefense'), opts.get('light'), opts.get('mode_invasion'),
+                           opts.get('mode_battle_royale'))
     out_dir = os.path.join(maps_dir, name)
     os.makedirs(out_dir, exist_ok=True)
     out = os.path.join(out_dir, name + '.map')
@@ -168,7 +173,10 @@ def run_generation(place, area_km, tiles, game_dir, maps_dir, log=print, center=
     elif os.path.exists(strp):
         os.remove(strp)
     inip = os.path.join(out_dir, 'map.ini')            # Zombie mode: the shop Humvee
-    if g.opt['mode_zombie']:
+    if g.battle_royale:
+        with open(inip, 'w', encoding='latin-1', newline='\r\n') as f:
+            f.write(g.map_ini)
+    elif g.opt['mode_zombie']:
         with open(inip, 'w', encoding='latin-1', newline='\r\n') as f:
             f.write(generator.Gen.full_zombie_ini(bool(opts.get('mode_zsurvival') or opts.get('mode_zdefense')),
                                                   opts.get('zs_bounty', 10), bool(opts.get('zombie_growing')),
@@ -337,7 +345,7 @@ def gui():
 
     saved = {}
     try:
-        saved = json.load(open(SETTINGS, encoding='utf-8'))
+        saved = migrate_br_settings(json.load(open(SETTINGS, encoding='utf-8')))
     except Exception:
         pass
     tr.LANG = saved.get('lang', 'en')
@@ -756,6 +764,7 @@ def gui():
     m_zs = var('mode_zsurvival', 'b', False)
     m_zd = var('mode_zdefense', 'b', False)
     m_invasion = var('mode_invasion', 'b', False)
+    m_br = var('mode_battle_royale', 'b', False)
     # one Zombie card, the variant below it (the three switches underneath stay as they were for the generator)
     ZKINDS = {'Klasický': 'Kolá hord terroristov z okrajov mapy, ďalšia vlna až keď zničíš všetkých. Máš základňu '
                           'a k tomu Humvee obchod s vojakmi. Dá sa spojiť s Clearance.',
@@ -781,6 +790,7 @@ def gui():
         _zsync['busy'] = True
         k = zkind_key(); on = bool(z_on.get())
         if on and m_invasion.get(): m_invasion.set(False)
+        if on and m_br.get(): m_br.set(False)
         zdl.config(text=T(ZKINDS[k]))
         m_zomb.set(on and k == 'Klasický'); m_zs.set(on and k == 'Survival'); m_zd.set(on and k == 'Defense')
         if on and k != 'Klasický' and m_clear.get(): m_clear.set(False)     # Survival / Defense stand alone
@@ -790,6 +800,7 @@ def gui():
     def clear_on(*_):
         if m_clear.get() and m_invasion.get():
             m_invasion.set(False)
+        if m_clear.get() and m_br.get(): m_br.set(False)
         if m_clear.get() and z_on.get() and zkind_key() != 'Klasický':
             z_kind.set(T('Klasický'))
     m_clear.trace_add('write', clear_on)
@@ -797,8 +808,9 @@ def gui():
     def zs_layout(*_):
         if 'layout' not in V: return
         lv = V['layout'][0]
-        desired = 'invasion' if m_invasion.get() else 'zsurv' if m_zs.get() or m_zd.get() else 'auto'
-        if desired != 'auto' or LAYOUT_OPTS.get(lv.get()) in ('zsurv', 'invasion'):
+        desired = ('battle_royale' if m_br.get() else 'invasion' if m_invasion.get() else
+                   'zsurv' if m_zs.get() or m_zd.get() else 'auto')
+        if desired != 'auto' or LAYOUT_OPTS.get(lv.get()) in ('zsurv', 'invasion', 'battle_royale'):
             name = next(k for k, value in LAYOUT_OPTS.items() if value == desired)
             if lv.get() != name: lv.set(name)
     m_zs.trace_add('write', zs_layout)
@@ -827,6 +839,7 @@ def gui():
 
     def invasion_sync(*_):
         if m_invasion.get():
+            if m_br.get(): m_br.set(False)
             if z_on.get(): z_on.set(False)
             if m_clear.get(): m_clear.set(False)
             inv_panel.master.grid()
@@ -838,9 +851,37 @@ def gui():
         for widget in air_widgets:
             widget.grid_remove() if inv_faction.get() == 'GLA' else widget.grid()
 
+    br_link = section(t0, 'Battle Royale')
+    br_page = tab('Battle Royale', '◎')
+    button(br_link, 'Otvoriť Battle Royale', lambda: show_page(br_page))
+    mode_card(br_page, m_br, '◎', 'Battle Royale',
+              'Až 32 hráčov, každý za seba. Začni s jedným pešiakom a unikaj pred radiáciou.')
+    br_vars = {}
+    for title, fields in BR_GROUPS.items():
+        panel = section(br_page, title, advanced=True, open_=title == 'Hlavná postava')
+        for key, (default, minimum, maximum, slovak, english) in fields.items():
+            is_toggle = isinstance(default, bool)
+            br_vars[key] = v = var(key, 'b' if is_toggle else 'i', default)
+            label = slovak if tr.LANG == 'sk' else english
+            if is_toggle:
+                check(panel, label, v)
+            else:
+                row(panel, label, number_field(panel, v, minimum, maximum, 1))
+
+    def battle_royale_sync(*_):
+        if m_br.get():
+            if m_invasion.get(): m_invasion.set(False)
+            if z_on.get(): z_on.set(False)
+            if m_clear.get(): m_clear.set(False)
+        zs_layout()
+
+    m_br.trace_add('write', battle_royale_sync)
     m_invasion.trace_add('write', invasion_sync)
     inv_faction.trace_add('write', invasion_air_sync)
-    if m_invasion.get(): invasion_sync()
+    battle_royale_sync()
+    if m_br.get():
+        invasion_sync()
+    elif m_invasion.get(): invasion_sync()
     else:
         z_sync()
         invasion_sync()
@@ -1116,7 +1157,8 @@ def gui():
     OPT_MAP = {'scale': 'SCALES', 'shape': 'SHAPES', 'layout': 'LAYOUT_OPTS', 'resources': 'RES_OPTS', 'season': 'SEASON_OPTS',
                'time_of_day': 'TIME_OPTS', 'building_style': 'STYLE_OPTS', 'ins_difficulty': 'INS_LEVELS',
                'fortress_faction': 'FORT_FACTIONS', 'fortress_level': 'FORT_LEVELS', 'zombie_pacing': 'ZOMBIE_PACING'}
-    MODE_KEYS = ('mode_zombie', 'mode_zsurvival', 'mode_zdefense', 'mode_invasion')
+    ZOMBIE_KEYS = ('mode_zombie', 'mode_zsurvival', 'mode_zdefense')
+    MODE_KEYS = ZOMBIE_KEYS + ('mode_invasion', 'mode_battle_royale')
     # templates change only what they name; everything else (place, size, folders ...) stays as it is
     TEMPLATES = {'Šablóna: bežný skirmish': dict(mode_clearance=False, mode_zombie=False, mode_zsurvival=False,
                                                  mode_zdefense=False, players=4, layout=list(_ORIG['LAYOUT_OPTS'])[0],
@@ -1129,7 +1171,9 @@ def gui():
                  'Šablóna: Zombie Defense (2 ľudia)': dict(mode_clearance=False, mode_zombie=False, mode_zsurvival=False,
                                                            mode_zdefense=True, players=3, black_map=True, preset='Stredná'),
                  'Šablóna: Invasion (2 ľudia)': dict(mode_clearance=False, mode_zombie=False, mode_zsurvival=False,
-                                                    mode_zdefense=False, mode_invasion=True, players=3)}
+                                                    mode_zdefense=False, mode_invasion=True, players=3),
+                 'Šablóna: Battle Royale': dict(mode_clearance=False, mode_zombie=False, mode_zsurvival=False,
+                                               mode_zdefense=False, mode_battle_royale=True, players=8)}
 
     def read_profiles():
         try: return json.load(open(PROFILES, encoding='utf-8'))
@@ -1148,18 +1192,21 @@ def gui():
         except Exception: pass
 
     def apply_profile(d, run_preset=False):
+        d = migrate_br_settings(d)
         if run_preset and d.get('preset'):
             put('preset', d['preset']); apply_preset()           # a template: the preset sets the numbers first
         for key, val in d.items():
             if key in ('lat', 'lon', 'place', 'starts'): continue
             if key == 'preset' and run_preset: continue
             put(key, val)
-        zs_ = {k_: bool(d.get(k_, V[k_][0].get())) for k_ in MODE_KEYS[:-1]}
+        zs_ = {k_: bool(d.get(k_, V[k_][0].get())) for k_ in ZOMBIE_KEYS}
+        m_br.set(False)
         m_invasion.set(False)
         z_kind.set(T('Defense' if zs_['mode_zdefense'] else 'Survival' if zs_['mode_zsurvival'] else 'Klasický'))
         z_on.set(any(zs_.values()))
         if 'mode_clearance' in d: m_clear.set(bool(d['mode_clearance']))
         m_invasion.set(bool(d.get('mode_invasion', False)))
+        m_br.set(bool(d.get('mode_battle_royale', False)))
         if 'place' in d: place.delete(0, 'end'); place.insert(0, d['place'])
         if 'starts' in d: picker.starts = [tuple(p) for p in d['starts']]
         if 'lat' in d and 'lon' in d:
@@ -1374,8 +1421,11 @@ def gui():
         except Exception:
             k = km.get()
         modes_ = [n for n, v in (('Clearance', m_clear), ('Zombie', m_zomb), ('ZombieSurvival', m_zs),
-                                  ('ZombieSurvival Defense', m_zd), ('Invasion', m_invasion)) if v.get()]
-        if m_invasion.get():
+                                  ('ZombieSurvival Defense', m_zd), ('Invasion', m_invasion),
+                                  ('Battle Royale', m_br)) if v.get()]
+        if m_br.get():
+            pl = f"{max(2, int(players.get()))} {T('hráči')}"
+        elif m_invasion.get():
             pl = f"{max(1, int(players.get()) - 1)} {T('obrancovia + GLA AI')}"
         elif m_zs.get() or m_zd.get():
             pl = f"{max(1, int(players.get()) - 1)} {T('ľudia + zombie AI')}"
@@ -1385,7 +1435,7 @@ def gui():
         parts = [nm_, f'{float(k):g} × {float(k) * aspect_of():g} km', pl,
                  ' + '.join(modes_) if modes_ else T('bežný skirmish')]
         if m_black.get(): parts.append(T('čierna mapa'))
-        if ins.get() and not m_invasion.get(): parts.append(T('povstalci'))
+        if ins.get() and not (m_invasion.get() or m_br.get()): parts.append(T('povstalci'))
         pk = preset_key()
         if pk != 'Vlastná': parts.append(T(pk))
         parts.append('GeneralsX · ' + T('plný detail') + ' · ' + T('cesty neobmedzené'))
@@ -1403,9 +1453,10 @@ def gui():
 
     def mode_flags():
         return dict(clearance=bool(m_clear.get()), zombie=bool(m_zomb.get()), zsurv=bool(m_zs.get()),
-                    zdef=bool(m_zd.get()), light=bool(light.get()), invasion=bool(m_invasion.get()))
+                    zdef=bool(m_zd.get()), light=bool(light.get()), invasion=bool(m_invasion.get()),
+                    battle_royale=bool(m_br.get()))
 
-    for v in (m_clear, m_zomb, m_zs, m_zd, m_invasion, m_black, players, km, shape, mname, ins, preset, target, detail, gxdir,
+    for v in (m_clear, m_zomb, m_zs, m_zd, m_invasion, m_br, m_black, players, km, shape, mname, ins, preset, target, detail, gxdir,
               *(V[k_][0] for k_ in ('footways', 'fences', 'lamps', 'cars', 'civilians') if k_ in V)):
         v.trace_add('write', update_summary)
     update_summary()
@@ -1498,7 +1549,7 @@ def gui():
         """Plan + pre-check, once after a burst of changes (dragging the square or a slider fires many)."""
         if refresh_job['id']: root.after_cancel(refresh_job['id'])
         refresh_job['id'] = root.after(150, lambda: (update_plan(), update_precheck()))
-    for v in (layout, players, scale, km, shape, base, m_clear, m_zomb, m_zs, m_zd, m_invasion, mname, gdir, gxdir, mdir, mdir_gx, target):
+    for v in (layout, players, scale, km, shape, base, m_clear, m_zomb, m_zs, m_zd, m_invasion, m_br, mname, gdir, gxdir, mdir, mdir_gx, target):
         v.trace_add('write', schedule_refresh)
     sel_hooks.append(schedule_refresh)
     picker.on_starts = lambda _s: schedule_refresh()
@@ -1506,16 +1557,16 @@ def gui():
 
     def refresh(*_):
         lay = LAYOUT_OPTS.get(layout.get(), 'auto')
-        automatic = m_invasion.get() or m_zs.get() or m_zd.get()
+        automatic = m_br.get() or m_invasion.get() or m_zs.get() or m_zd.get()
         layout_combo.configure(state='disabled' if automatic else 'readonly',
                                values=list(LAYOUT_OPTS) if automatic else [k for k, v in LAYOUT_OPTS.items()
-                                                                         if v not in ('zsurv', 'invasion')])
+                                                                         if v not in ('zsurv', 'invasion', 'battle_royale')])
         picker.start_mode = lay == 'manual' and not automatic
         try: picker.max_starts = int(players.get())
         except Exception: pass
         picker.starts = picker.starts[:picker.max_starts]
         sel_changed(); picker.redraw()
-    for v in (layout, players, scale, km, huge, m_zomb, m_zs, m_zd, m_invasion):
+    for v in (layout, players, scale, km, huge, m_zomb, m_zs, m_zd, m_invasion, m_br):
         v.trace_add('write', refresh)
     if saved.get('starts'):
         picker.starts = [tuple(p) for p in saved['starts']]
@@ -1703,9 +1754,10 @@ def gui():
             return messagebox.showwarning(T('Zombie'), T('Zombie mód je len pre menšie mapy - zmenši oblasť na najviac ') +
                                           f'{ZOMBIE_MAX_TILES * M_PER_TILE_1TO1 * sc / 1000:g} km.')
         lay = LAYOUT_OPTS.get(layout.get(), 'auto')
-        if m_invasion.get(): lay = 'invasion'
+        if m_br.get(): lay = 'battle_royale'
+        elif m_invasion.get(): lay = 'invasion'
         elif m_zs.get() or m_zd.get(): lay = 'zsurv'
-        elif lay in ('zsurv', 'invasion'): lay = 'auto'
+        elif lay in ('zsurv', 'invasion', 'battle_royale'): lay = 'auto'
         npl = int(players.get())
         inside = []
         if lay == 'manual':
@@ -1759,9 +1811,10 @@ def gui():
                       fortress_level=FORT_LEVELS.get(flvl.get(), 2),
                       mode_clearance=bool(m_clear.get()), mode_zombie=bool(m_zomb.get()), black_map=bool(m_black.get()),
                       mode_zsurvival=bool(m_zs.get()), mode_zdefense=bool(m_zd.get()),
-                      mode_invasion=bool(m_invasion.get()), invasion_faction=inv_faction.get(),
+                      mode_battle_royale=bool(m_br.get()), mode_invasion=bool(m_invasion.get()), invasion_faction=inv_faction.get(),
                       invasion_air=bool(inv_air.get()), language=tr.LANG,
                       **{key: int(value.get()) for key, value in inv_vars.items()},
+                      **{key: value.get() for key, value in br_vars.items()},
                       ins_qrf=bool(qrf.get()),
                       zombie_size=int(z_size.get()), zombie_growth=int(z_grow.get()), zombie_start=int(z_start.get()),
                       zombie_break=int(z_break.get()), zombie_growing=bool(z_growing.get()),
@@ -1783,11 +1836,13 @@ if __name__ == '__main__':
         ap.add_argument('place'); ap.add_argument('--km', type=float, default=5.0)
         ap.add_argument('--scale', type=float, default=1.0)
         ap.add_argument('--game', default=catalog.find_game_dir()); ap.add_argument('--out', default=catalog.default_maps_dir())
-        ap.add_argument('--invasion', choices=INVASION_ROSTERS, metavar='FACTION', help='Invasion with China, GLA or USA')
+        modes = ap.add_mutually_exclusive_group()
+        modes.add_argument('--battle-royale', action='store_true', help='free-for-all Battle Royale (2 to 32 slots)')
+        modes.add_argument('--invasion', choices=INVASION_ROSTERS, metavar='FACTION', help='Invasion with China, GLA or USA')
         ap.add_argument('--players', type=int, default=4, help='number of player slots')
         a = ap.parse_args()
         run_generation(a.place, a.km, tiles_for(a.km, a.scale), a.game, a.out, players=a.players,
-                       mode_invasion=bool(a.invasion), invasion_faction=a.invasion)
+                       mode_invasion=bool(a.invasion), invasion_faction=a.invasion, mode_battle_royale=a.battle_royale)
     else:
         while gui() == 'restart':
             pass

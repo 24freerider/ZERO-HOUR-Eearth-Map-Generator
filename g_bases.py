@@ -127,7 +127,7 @@ class BasesMixin:
 
     def place_bases(self):
         self.starts = []
-        if self.layout in ('zsurv', 'invasion'):
+        if self.layout in ('zsurv', 'invasion', 'battle_royale'):
             self.place_hidden_starts()
             return
         if self.layout == 'manual' and len(self.manual_starts) >= 2:
@@ -174,7 +174,8 @@ class BasesMixin:
 
     def place_hidden_starts(self):
         """Keep the command centres in the border while the players start in the arena."""
-        self.starts = preflight.hidden_starts(self.AX, self.AY, self.humans, BORDER * CELL)
+        self.starts = preflight.hidden_starts(self.AX, self.AY, self.humans, BORDER * CELL,
+                                              reserve_ai=not self.battle_royale)
         self.stats['players'] = len(self.starts)
         self.write_start_waypoints()
 

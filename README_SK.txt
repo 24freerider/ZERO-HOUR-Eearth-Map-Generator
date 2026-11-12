@@ -1,4 +1,4 @@
-ZERO HOUR EARTH v0.53.5
+ZERO HOUR EARTH v0.53.29
 ======================
 Generátor reálnych máp z OpenStreetMap pre C&C Generals: Zero Hour.
 Čo je nové: pozri CHANGELOG_SK.txt
@@ -64,3 +64,24 @@ ZNÁME OBMEDZENIA
   - hra nemá európsky kostol, používa sa náhrada (GermanTownHall)
   - poschodovanie budov, obrovské mapy a nepriateľská pevnosť sú experimentálne
   - zima mení len stromy, zem ostáva zelená
+
+BATTLE ROYALE
+  V Herných módoch otvor samostatnú stránku Battle Royale a zapni režim.
+  Na karte Hráči nastav 2 až 32 miest.
+  Použi rovnakú verziu GeneralsX na všetkých počítačoch. Hraj každý za seba, bez
+  riadiacej GLA AI. Súbory map.ini a map.str nechaj v priečinku mapy.
+  Na stránke Battle Royale môžeš upravovať postavu, ceny a poškodenie schopností,
+  fázy zóny, radiáciu, osadenie mapy, odmeny aj elitné debny. Hodnoty sa ukladajú do profilov.
+  Začínaš s jedným pešiakom. Civilisti a farmári zanechávajú peniaze na zobratie.
+  V nastaveniach Battle Royale zadaj najviac 2 000 civilistov, 1 200 rebelov
+  a 500 civilných vozidiel. Civilné autá sú pri cestách, parkoviskách a štartoch.
+  Do neutrálneho vozidla nastúpiš zadarmo. Civilné auto sa po vystúpení posledného
+  vojaka vráti do neutrálneho stavu, kým ho nekúpiš v jeho paneli. Kúpené auto môžeš
+  poslať na prieskum aj bez posádky. Predvolene sú na mape tri Nuke Trucky.
+  Samostatne sa umiestni najviac 64 Humvee. Elitné Salvage debny zostávajú na zemi
+  aj po posune zóny. Prejdi hrdinom cez debnu a získaš jednu hodnosť až po Heroic.
+  Radar obnovuje značku, kým je debna na zemi.
+  Vo WEAPONS kúpiš RPG alebo ostreľovaciu pušku a rovnakým tlačidlom ju vyberieš.
+  Pod WEAPONS je Ability Shop. V Killstreaks kúpiš a zacieliš Precision Airstrike
+  alebo Cluster Strike. Každú nálož C4 kúpiš a položíš zvlášť. Až päť položených náloží odpáliš naraz.
+  Sleduj odpočet a ustupuj pred radiáciou. Posledný hráč s pešiakom vyhráva.

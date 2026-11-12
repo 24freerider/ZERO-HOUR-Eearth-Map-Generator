@@ -5,6 +5,12 @@ Generátor reálnych máp z OpenStreetMap pre C&C Generals: Zero Hour.
 Verzie 0.1 až 0.8 sú očíslované spätne (predtým sa program volal "CNC Earth").
 
 
+v0.53.7
+- Battle Royale vytvorí prvého pešiaka pred odstránením základne. Prvý pešiak má 4× HP a v uliciach je až o 25 % viac povstalcov.
+
+v0.53.6
+- Nový režim Battle Royale pre 2–32 hráčov: jeden pešiak, pouliční povstalci, štyri typy vozidiel a päť fáz radiácie.
+
 v0.53.5
 - Sústavný režim Zombie používa pôvodné tempo, skladbu hordy a príchody bossov z verzie 0.52.1. Počítadlo fáz pokračuje a limit aktívnych zombíkov sa dá nastaviť.
 

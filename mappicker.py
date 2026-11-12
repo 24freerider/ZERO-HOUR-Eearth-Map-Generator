@@ -330,6 +330,7 @@ class MapPicker:
                 c.create_text(x, y, text='HQ', fill='#fff', font=('Segoe UI', 8, 'bold'))
             c.create_text(10, 15, anchor='w', fill='#ffd000', font=('Segoe UI', 9, 'bold'),
                           text=T('Invasion: obrancovia začínajú pri spoločnom veliteľstve' if invasion
+                                 else 'Battle Royale: pešiaci začínajú na náhodných miestach' if plan['layout'] == 'battle_royale'
                                  else 'ZombieSurvival: štarty sú v čiernom okraji mimo mapy'))
 
     def redraw(self):

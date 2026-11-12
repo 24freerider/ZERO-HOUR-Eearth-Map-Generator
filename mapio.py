@@ -274,28 +274,39 @@ def parse_sides(m):
 class Script:
     """One script: list of (actionName, actionEnum, [params]) run once when the game starts.
     params: ('side'|'unit'|'relation', value)."""
-    def __init__(self, name, actions, conditions=None, delay=0, once=True, else_actions=None, any_of=None):
+    def __init__(self, name, actions, conditions=None, delay=0, once=True, else_actions=None, any_of=None, active=True):
         """conditions: [(conditionName, [params])], all must hold; delay: re-check every N seconds;
         once=False: the script stays active and runs again whenever its conditions hold."""
         self.name, self.actions = name, actions
         self.conditions, self.delay, self.once = conditions or [], int(delay), once
         self.else_actions = else_actions or []      # run when the conditions do NOT hold (ScriptActionFalse)
         self.any_of = any_of or []                  # [[conds], [conds]]: OR of AND-groups (several OrCondition chunks)
+        self.active = active
 
 
-PARAM_TYPE = {'side': 11, 'unit': 14, 'relation': 19, 'int': 0, 'path': 24, 'type': 15, 'team': 3, 'waypoint': 7,
-              'comparison': 6, 'area': 9, 'counter': 4, 'real': 1, 'text': 25, 'kindof': 27, 'power': 30, 'science': 31, 'faction': 46, 'surfaces': 36, 'button': 41}
-ACTION_ENUM = {'NAMED_FOLLOW_WAYPOINTS': 56, 'PLAYER_RELATES_PLAYER': 86, 'NAMED_GARRISON_SPECIFIC_BUILDING': 107,
+class ScriptGroup:
+    # World Builder subroutine groups run only when explicitly called.
+    def __init__(self, name, scripts):
+        self.name, self.scripts = name, scripts
+
+
+PARAM_TYPE = {'script': 2, 'object_list': 47, 'subroutine': 13, 'radar_event': 29, 'side': 11, 'sound': 12, 'unit': 14, 'relation': 19, 'int': 0, 'path': 24, 'type': 15, 'team': 3, 'waypoint': 7,
+              'comparison': 6, 'area': 9, 'counter': 4, 'real': 1, 'text': 25, 'kindof': 27, 'power': 30, 'science': 31, 'upgrade': 32, 'faction': 46, 'surfaces': 36, 'button': 41}
+ACTION_ENUM = {'NO_OP': 5, 'PLAY_SOUND_EFFECT': 7, 'ENABLE_SCRIPT': 8, 'DISABLE_SCRIPT': 9, 'OBJECTLIST_ADDOBJECTTYPE': 287, 'CALL_SUBROUTINE': 10, 'NAMED_FOLLOW_WAYPOINTS': 56, 'PLAYER_RELATES_PLAYER': 86, 'NAMED_GARRISON_SPECIFIC_BUILDING': 107,
+               'PLAYER_TRANSFER_OWNERSHIP_PLAYER': 84, 'TEAM_WANDER_IN_PLACE': 233, 'PLAYER_HUNT': 96,
+               'RADAR_FORCE_ENABLE': 208, 'OBJECT_CREATE_RADAR_EVENT': 213, 'MAP_REVEAL_ALL': 102,
+               'NAMED_STOP_SPECIAL_POWER_COUNTDOWN': 164, 'NAMED_START_SPECIAL_POWER_COUNTDOWN': 165,
+               'NAMED_SET_SPECIAL_POWER_COUNTDOWN': 166,
                'PLAYER_GARRISON_ALL_BUILDINGS': 110, 'CREATE_UNNAMED_ON_TEAM_AT_WAYPOINT': 41, 'TEAM_GUARD': 58,
                'TEAM_HUNT': 60, 'SET_TIMER': 6, 'PLAYER_SET_MONEY': 154, 'SET_COUNTER': 2, 'INCREMENT_COUNTER': 15,
                'DEFEAT': 4,
                'DECREMENT_COUNTER': 16, 'SET_MILLISECOND_TIMER': 20, 'DISPLAY_COUNTER': 236, 'MAP_SHROUD_ALL': 146,
-               'ENABLE_BORDER_SHROUD': 318, 'DISPLAY_TEXT': 76, 'DISPLAY_COUNTDOWN_TIMER': 160, 'HIDE_COUNTDOWN_TIMER': 161,
+               'ENABLE_BORDER_SHROUD': 318, 'DISPLAY_TEXT': 76, 'SHOW_MILITARY_CAPTION': 139, 'DISPLAY_COUNTDOWN_TIMER': 160, 'HIDE_COUNTDOWN_TIMER': 161,
                'MAP_REVEAL_AT_WAYPOINT': 90, 'PLAYER_GIVE_MONEY': 155, 'TEAM_DELETE': 72, 'PLAYER_KILL': 75,
-               'NAMED_TRANSFER_OWNERSHIP_PLAYER': 85, 'PLAYER_GRANT_SCIENCE': 276, 'NAMED_DELETE': 71,
+               'NAMED_TRANSFER_OWNERSHIP_PLAYER': 85, 'PLAYER_SET_RANKLEVELLIMIT': 275, 'PLAYER_GRANT_SCIENCE': 276, 'NAMED_DELETE': 71, 'NAMED_RECEIVE_UPGRADE': 252,
                'CREATE_NAMED_ON_TEAM_AT_WAYPOINT': 40, 'TEAM_ATTACK_NAMED': 50, 'TEAM_USE_COMMANDBUTTON_ABILITY_AT_WAYPOINT': 239, 'MOVE_CAMERA_TO': 14, 'RESET_CAMERA': 19, 'NAMED_KILL': 73, 'SET_RANDOM_MSEC_TIMER': 148}
-COND_ENUM = {'CONDITION_TRUE': 3, 'NAMED_NOT_DESTROYED': 16, 'PLAYER_HAS_COMPARISON_UNIT_TYPE_IN_TRIGGER_AREA': 73,
-             'TIMER_EXPIRED': 4, 'PLAYER_ALL_DESTROYED': 5, 'COUNTER': 1,
+COND_ENUM = {'BUILDING_ENTERED_BY_PLAYER': 50, 'TYPE_SIGHTED': 76, 'NAMED_BUILDING_IS_EMPTY': 77, 'NAMED_DYING': 55, 'NAMED_ATTACKED_BY_PLAYER': 21, 'NAMED_HAS_FREE_CONTAINER_SLOTS': 108, 'PLAYER_TRIGGERED_SPECIAL_POWER_FROM_NAMED': 63, 'CONDITION_TRUE': 3, 'NAMED_NOT_DESTROYED': 16, 'PLAYER_HAS_COMPARISON_UNIT_TYPE_IN_TRIGGER_AREA': 73,
+             'TIMER_EXPIRED': 4, 'PLAYER_ALL_DESTROYED': 5, 'COUNTER': 1, 'PLAYER_BUILT_UPGRADE_FROM_NAMED': 69,
              'PLAYER_HAS_COMPARISON_UNIT_KIND_IN_TRIGGER_AREA': 74, 'NAMED_DESTROYED': 15,
              'PLAYER_HAS_OBJECT_COMPARISON': 57, 'SKIRMISH_PLAYER_IS_OUTSIDE_AREA': 98, 'PLAYER_TRIGGERED_SPECIAL_POWER': 60,
              'SKIRMISH_PLAYER_HAS_UNITS_IN_AREA': 96, 'SKIRMISH_PLAYER_FACTION': 86, 'NAMED_OWNED_BY_PLAYER': 30, 'TEAM_INSIDE_AREA_PARTIALLY': 7, 'START_POSITION_IS': 107}
@@ -306,7 +317,7 @@ GREATER_EQUAL = 3
 def _script_bytes(m, s):
     def param(kind, v):
         t = PARAM_TYPE[kind]
-        if kind in ('relation', 'int', 'comparison', 'surfaces'):
+        if kind in ('relation', 'int', 'comparison', 'surfaces', 'radar_event'):
             return struct.pack('<Iif', t, int(v), 0.0) + _wstr('')
         if kind == 'kindof':                 # int = KindOf bit, string = its name (as World Builder writes it)
             return struct.pack('<Iif', t, KINDOF[v], 0.0) + _wstr(v)
@@ -319,7 +330,7 @@ def _script_bytes(m, s):
                    struct.pack('<I', len(ps)) + b''.join(param(k, v) for k, v in ps)) for cn, ps in conds))
     groups = getattr(s, 'any_of', None) or [getattr(s, 'conditions', None) or [('CONDITION_TRUE', [])]]
     body = [_wstr(s.name), _wstr(''), _wstr(''), _wstr(''),
-            bytes([1, 1 if getattr(s, 'once', True) else 0, 1, 1, 1, 0]), struct.pack('<i', int(getattr(s, 'delay', 0)))]
+            bytes([int(getattr(s, 'active', True)), int(getattr(s, 'once', True)), 1, 1, 1, 0]), struct.pack('<i', int(getattr(s, 'delay', 0)))]
     body += [group(g) for g in groups]
     for aname, params in s.actions:
         pay = struct.pack('<I', ACTION_ENUM[aname]) + struct.pack('<I', _key(m, aname, 3)) + struct.pack('<I', len(params))
@@ -330,6 +341,14 @@ def _script_bytes(m, s):
         pay += b''.join(param(k, v) for k, v in params)
         body.append(_chunk(m, 'ScriptActionFalse', 2, pay))
     return _chunk(m, 'Script', 2, b''.join(body))
+
+
+def _script_entry_bytes(m, entry):
+    if isinstance(entry, ScriptGroup):
+        body = _wstr(entry.name) + bytes((1, 1))
+        body += b''.join(_script_bytes(m, script) for script in entry.scripts)
+        return _chunk(m, 'ScriptGroup', 2, body)
+    return _script_bytes(m, entry)
 
 
 def write_sides(m, extra_sides, scripts_by_side, extra_teams=()):
@@ -365,7 +384,7 @@ def write_sides(m, extra_sides, scripts_by_side, extra_teams=()):
     out.append(struct.pack('<I', len(teams)))
     for d in teams:
         out.append(write_dict(d))
-    lists = b''.join(_chunk(m, 'ScriptList', 1, b''.join(_script_bytes(m, s) for s in scripts_by_side.get(nm, [])))
+    lists = b''.join(_chunk(m, 'ScriptList', 1, b''.join(_script_entry_bytes(m, s) for s in scripts_by_side.get(nm, [])))
                      for nm in names)
     out.append(_chunk(m, 'PlayerScriptsList', 1, lists))
     for c in m.chunks:

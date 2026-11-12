@@ -3,6 +3,12 @@ ZERO HOUR EARTH - changelog
 Versioning: 0.X.Y - X = new feature / bigger change, Y = bug fix.
 Versions 0.1 - 0.8 were numbered afterwards (the program used to be called "CNC Earth").
 
+v0.53.7
+- Battle Royale now creates the starter before clearing the original base. The starter has 4x HP and there are 25% more street rebels where space allows.
+
+v0.53.6
+- Added Battle Royale for 2–32 slots: one rifleman, street rebels, four salvage vehicles and five radioactive zone stages.
+
 v0.53.5
 - Restored the v0.52.1 Continuous Zombie spawn rate, unit mix and boss schedule. The phase counter keeps advancing and the active zombie limit remains configurable.
 

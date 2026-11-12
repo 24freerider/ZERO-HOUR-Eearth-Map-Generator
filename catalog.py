@@ -29,6 +29,10 @@ class Catalog:
         self.road_w = {}      # road type -> width
         self.objects = set()  # every Object / ObjectReskin name the game knows
         self.garrison = {}    # building name -> how many soldiers fit inside (GarrisonContain)
+        self.armors = {}      # armor name -> original INI definition
+        self.structure_armor_sets = {}  # structure name -> original ArmorSet blocks
+        self.vehicle_modules = {}  # vehicle name -> AI, containment and car-bomb module tags
+        self.usa_shortcuts = {}  # original USA sidebar command sets
         self.road_segments = 4000   # GameData.ini MaxRoadSegments the game will really use
 
     @staticmethod
@@ -38,6 +42,17 @@ class Catalog:
             if not os.path.isfile(bp):
                 continue
             d, files = read_big(bp)
+            if 'data\\ini\\armor.ini' in files:
+                off, sz = files['data\\ini\\armor.ini']
+                text = d[off:off + sz].decode('latin1')
+                for armor in re.finditer(r'^Armor[ \t]+(\w+)\b(.*?)^End\b', text, re.M | re.S | re.I):
+                    cat.armors.setdefault(armor[1], armor[2].strip())
+            if 'data\\ini\\commandset.ini' in files:
+                off, sz = files['data\\ini\\commandset.ini']
+                text = d[off:off + sz].decode('latin1')
+                for shortcuts in re.finditer(r'^CommandSet[ \t]+(\w*SpecialPowerShortcutUSA)\b(.*?)^End\b',
+                                             text, re.M | re.S | re.I):
+                    cat.usa_shortcuts.setdefault(shortcuts[1], re.findall(r'^[ \t]*(\d+)\s*=\s*(\w+)', shortcuts[2], re.M))
             for fn in ('data\\ini\\object\\civilianbuilding.ini', 'data\\ini\\object\\techbuildings.ini',
                        'data\\ini\\object\\factionbuilding.ini'):
                 if fn not in files: continue
@@ -55,8 +70,20 @@ class Catalog:
                     t = d[off:off + sz].decode('latin1')
                     cat.objects.update(re.findall(r'^(?:Object|ObjectReskin)\s+(\S+)', t, re.M))
                     for m in re.finditer(r'^Object\s+(\S+)(.*?)^End\s*$', t, re.S | re.M):
-                        g = re.search(r'GarrisonContain.*?ContainMax\s*=\s*(\d+)', m.group(2), re.S)
+                        body = m.group(2)
+                        g = re.search(r'GarrisonContain.*?ContainMax\s*=\s*(\d+)', body, re.S)
                         if g: cat.garrison.setdefault(m.group(1), int(g.group(1)))
+                        kind = re.search(r'^[ \t]*KindOf\s*=\s*([^;\r\n]+)', body, re.M | re.I)
+                        if kind and 'VEHICLE' in kind[1].upper().split():
+                            modules = re.findall(
+                                r'^[ \t]*Behavior\s*=\s*(AIUpdateInterface|TransportAIUpdate|TransportContain|'
+                                r'ConvertToCarBombCrateCollide)\s+(\w+)', body, re.M)
+                            cat.vehicle_modules.setdefault(m[1], modules)
+                        if kind and 'STRUCTURE' in kind[1].upper().split():
+                            sets = re.findall(r'^[ \t]*ArmorSet\b[^\r\n]*\r?\n.*?^[ \t]*End\b[^\r\n]*',
+                                              body, re.M | re.S | re.I)
+                            if sets:
+                                cat.structure_armor_sets.setdefault(m[1], sets)
             if 'data\\ini\\gamedata.ini' in files and not getattr(cat, '_rs_set', False):
                 off, sz = files['data\\ini\\gamedata.ini']
                 v = re.search(r'^\s*MaxRoadSegments\s*=\s*(\d+)', d[off:off + sz].decode('latin1'), re.M)

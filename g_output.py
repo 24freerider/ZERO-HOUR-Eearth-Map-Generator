@@ -253,10 +253,14 @@ class OutputMixin:
         for a, b in self.bridges:
             d.line([(self.cx(a[0]), self.cx(a[1])), (self.cx(b[0]), self.cx(b[1]))], fill=(255, 200, 0), width=4)
         h = self.base_clear / CELL / 2
-        for x, y in self.starts:
+        for x, y in () if self.battle_royale else self.starts:
             d.rectangle([self.cx(x) - h, self.cx(y) - h, self.cx(x) + h, self.cx(y) + h], outline=(255, 255, 0), width=2)
-        for i, (x, y) in enumerate(self.starts):
+        for x, y in self.br_drops if self.battle_royale else self.starts:
             d.ellipse([self.cx(x) - 5, self.cx(y) - 5, self.cx(x) + 5, self.cx(y) + 5], outline=(255, 255, 0), width=2)
+        if self.battle_royale:
+            for _, _, (x, y) in self.br_vehicles:
+                cx, cy = self.cx(x), self.cx(y)
+                d.rectangle((cx - 2, cy - 2, cx + 2, cy + 2), fill='#46bde5')
         if self.invasion:
             x, y = map(self.cx, self.invasion_hq)
             d.ellipse((x - 6, y - 6, x + 6, y + 6), fill='#285da0', outline='white')

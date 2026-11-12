@@ -79,7 +79,7 @@ def layout_rel(n, layout, AX, AY, base_clear):
 
 
 def start_plan(players, layout, km, tiles, aspect, base_size, clearance=False, zombie=False, zsurv=False,
-               zdef=False, manual_points=(), invasion=False):
+               zdef=False, manual_points=(), invasion=False, battle_royale=False):
     """Where the generator will put the starts (before terrain nudges them a little).
 
     Mirrors the player-count / layout logic at the top of generator.Gen.__init__ and place_bases().
@@ -94,9 +94,11 @@ def start_plan(players, layout, km, tiles, aspect, base_size, clearance=False, z
     import generator
     CELL, BORDER, MAXP = 10.0, generator.BORDER, generator.MAX_PLAYERS
     players = int(players)
-    if layout in ('zsurv', 'invasion') and not (zsurv or zdef or invasion): layout = 'auto'
+    if layout in ('zsurv', 'invasion', 'battle_royale') and not (zsurv or zdef or invasion or battle_royale): layout = 'auto'
     zs = bool(zsurv or zdef)
-    if invasion:
+    if battle_royale:
+        n, lay = max(2, min(MAXP, players)), 'battle_royale'
+    elif invasion:
         n, lay = max(2, min(MAXP, players)), 'invasion'
     elif zs:
         humans = max(1, min(MAXP - 1, players - 1))
@@ -116,12 +118,13 @@ def start_plan(players, layout, km, tiles, aspect, base_size, clearance=False, z
         lay = layout
     NX, NY = int(tiles), int(round(tiles * aspect))
     AX, AY = NX * CELL, NY * CELL
-    skirmish = not (clearance or zombie or zs or invasion)
+    skirmish = not (clearance or zombie or zs or invasion or battle_royale)
     base_clear = base_width(base_size, AX, AY, n, lay, skirmish)
     mpc = km * 1000.0 / tiles                      # metres per cell
     dim_m = (km * 1000.0, km * 1000.0 * NY / max(1, NX))
-    if lay in ('zsurv', 'invasion'):
-        pts = hidden_starts(AX, AY, n - 1, BORDER * CELL)
+    if lay in ('zsurv', 'invasion', 'battle_royale'):
+        reserve_ai = lay != 'battle_royale'
+        pts = hidden_starts(AX, AY, n - int(reserve_ai), BORDER * CELL, reserve_ai=reserve_ai)
         return dict(points=[(x / AX, y / AY) for x, y in pts], n=n, layout=lay, base_m=0.0, dim_m=dim_m, outside=True)
     if lay == 'manual':
         rel = [manual_point(x, y, AX, AY, base_clear) for x, y in manual_points[:MAXP - int(clearance or zombie)]]
@@ -131,12 +134,29 @@ def start_plan(players, layout, km, tiles, aspect, base_size, clearance=False, z
                 outside=False, skirmish=skirmish)
 
 
-def hidden_starts(width, height, humans, border):
-    """Hidden command centers above the playable map, with an AI start below it."""
+def hidden_starts(width, height, humans, border, reserve_ai=True):
+    """Hidden command centers above the playable map, optionally with an AI start below."""
+    if not reserve_ai:
+        inset = border * 0.47
+        w, h = width + 2 * inset, height + 2 * inset
+        starts = []
+        for k in range(humans):
+            d = (k + 0.37) * 2 * (w + h) / humans
+            if d < w:
+                x, y = d, 0
+            elif d < w + h:
+                x, y = w, d - w
+            elif d < 2 * w + h:
+                x, y = 2 * w + h - d, h
+            else:
+                x, y = 0, 2 * (w + h) - d
+            starts.append((x - inset, y - inset))
+        return starts
     step = min(420.0, (width + border) / humans)
     starts = [(width / 2 + (k - (humans - 1) / 2) * step, height + border * (0.35 if k % 2 else 0.6))
               for k in range(humans)]
-    starts.append((width / 2, -border * 0.5))
+    if reserve_ai:
+        starts.append((width / 2, -border * 0.5))
     return starts
 
 

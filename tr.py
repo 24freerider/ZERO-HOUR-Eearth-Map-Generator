@@ -5,6 +5,28 @@ import re
 LANG = 'en'
 
 EN = {
+    'Battle Royale (automaticky)': 'Battle Royale (automatic)',
+    'Až 32 hráčov, každý za seba. Začni s jedným pešiakom a unikaj pred radiáciou.':
+        'Free-for-all for up to 32 players. Start with one rifleman and outrun the radiation.',
+    'Nastavenia Battle Royale': 'Battle Royale Settings',
+    'Otvoriť Battle Royale': 'Open Battle Royale',
+    'Hlavná postava': 'Main Character',
+    'Trvalé vylepšenia': 'Permanent Upgrades',
+    'Schopnosti a výzbroj': 'Abilities and Weapons',
+    'Zóna': 'Zone',
+    'Mapa a odmeny': 'Map and Rewards',
+    'Počet civilistov': 'Number of civilians',
+    'Počet rebelov': 'Number of rebels',
+    'Počet civilných vozidiel': 'Number of civilian vehicles',
+    'Odmena za civilistu ($)': 'Civilian reward ($)',
+    'Odmena za farmára ($)': 'Farmer reward ($)',
+    'Odmena za rebela ($)': 'Rebel reward ($)',
+    'Civilisti a farmári zanechajú peniaze na zobratie. Odmenu za rebela dostane útočník priamo. Hodnota 0 vypne odmenu.':
+        'Civilians and farmers drop cash to pick up. Rebel rewards go directly to the attacker. Set a reward to 0 to disable it.',
+    'Limity: 2 000 civilistov, 1 200 rebelov, 500 civilných vozidiel. Počet závisí aj od voľného miesta na mape.':
+        'Limits: 2,000 civilians, 1,200 rebels, and 500 civilian vehicles. Placement depends on available space.',
+    'Šablóna: Battle Royale': 'Preset: Battle Royale',
+    'Battle Royale: pešiaci začínajú na náhodných miestach': 'Battle Royale: infantry drop at random locations',
     # --- option lists
     '1:1  (budovy a cesty v skutočnej veľkosti)': '1:1  (real-size buildings and roads)',
     '1:2  (2x väčšia oblasť, budovy zmenšené)': '1:2  (2x larger area, smaller buildings)',

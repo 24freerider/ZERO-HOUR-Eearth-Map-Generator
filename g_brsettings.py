@@ -103,6 +103,20 @@ BR_GROUPS = {
     },
 }
 BR_SETTINGS = {key: spec for group in BR_GROUPS.values() for key, spec in group.items()}
+BR_DEFAULTS = {key: spec[0] for key, spec in BR_SETTINGS.items()}
+
+
+def apply_battle_royale_options(options):
+    """Normalize the mode's settings and reserve layout and population for it."""
+    for key, (default, minimum, maximum, _, _) in BR_SETTINGS.items():
+        if isinstance(default, bool):
+            options[key] = str(options[key]).lower() in ('true', '1', 'yes')
+        else:
+            options[key] = min(maximum, max(minimum, int(options[key])))
+    options.update(mode_invasion=False, mode_clearance=False, mode_zombie=False, mode_zsurvival=False,
+                   mode_zdefense=False, insurgents=False, fortress=False, outposts=0, patrols=0,
+                   foot_patrols=0, ins_qrf=False, ins_bases=None, ai_paths=False, train=False,
+                   cars=False, traffic=False, civilians=False, farm_life=False, black_map=True)
 
 
 def migrate_br_settings(settings):

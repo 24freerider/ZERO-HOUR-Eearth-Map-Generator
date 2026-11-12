@@ -7,10 +7,11 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from catalog import Catalog, find_game_dir
-from g_broyale import CIVIL_VEHICLES, RADAR_BEACON, START_CAR_DISTANCE
 from g_brhero import CAPTURE, HERO_BUTTONS
-from g_brini import HUMVEES, NUKE_TRUCK, POI, VEHICLE_BUY_UPGRADE
+from g_brini import POI
+from g_brscript import RADAR_BEACON
 from g_brsettings import BR_COUNTS, BR_SETTINGS, FIRST_RADIATION_WARNING, PHASES
+from g_brvehicles import CIVIL_VEHICLES, HUMVEES, NUKE_TRUCK, START_CAR_DISTANCE, VEHICLE_BUY_UPGRADE
 from g_invasion import timer
 from generator import generate
 from geo import Proj

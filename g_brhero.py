@@ -1,6 +1,11 @@
 """Map-local Battle Royale hero abilities and shop."""
 
 from itertools import product
+from typing import NamedTuple
+
+from g_brscript import PREFIX
+from g_invasion import counter, set_counter
+from mapio import Script
 
 HERO = 'EARTH_BR_Hero'
 DRONE = HERO + 'DroneUnit'
@@ -8,8 +13,30 @@ C4_CHARGE = HERO + 'RemoteCharge'
 C4_POWER = 'SpecialAbilityColonelBurtonRemoteCharges'
 AIR_POWER = HERO + 'PrecisionPower'
 CLUSTER_POWER = HERO + 'ClusterStrikePower'
-WEAPON_SLOTS = {'RPG': (2, 'SECONDARY', 'SURPG'), 'Sniper': (3, 'TERTIARY', 'SAPathfinder1')}
-KILLSTREAK_SLOTS = {'Air': (1, 'Strike', 'br_enable_air'), 'ClusterBuy': (2, 'ClusterStrike', 'br_enable_cluster')}
+
+
+class WeaponSlot(NamedTuple):
+    menu_slot: int
+    engine_slot: str
+    icon: str
+    weapon: str
+
+
+class KillstreakSlot(NamedTuple):
+    menu_slot: int
+    action: str
+    setting: str
+    power: str
+
+
+WEAPON_SLOTS = {
+    'RPG': WeaponSlot(2, 'SECONDARY', 'SURPG', 'TunnelDefenderRocketWeapon'),
+    'Sniper': WeaponSlot(3, 'TERTIARY', 'SAPathfinder1', HERO + 'SniperRifle'),
+}
+KILLSTREAK_SLOTS = {
+    'Air': KillstreakSlot(1, 'Strike', 'br_enable_air', AIR_POWER),
+    'ClusterBuy': KillstreakSlot(2, 'ClusterStrike', 'br_enable_cluster', CLUSTER_POWER),
+}
 
 # Key, icon, English title, Slovak title, English help, Slovak help.
 PURCHASES = (
@@ -87,8 +114,15 @@ def menu_states(keys):
 def hero_menu_keys(opt):
     return {
         'Weapons': [key for key in WEAPON_SLOTS if opt['br_enable_' + key.lower()]],
-        'Killstreaks': [key for key, (_, _, setting) in KILLSTREAK_SLOTS.items() if opt[setting]],
+        'Killstreaks': [key for key, spec in KILLSTREAK_SLOTS.items() if opt[spec.setting]],
     }
+
+
+def hero_alternate_weapons_ini(opt):
+    # Only an explicit equip command may lock a purchased weapon.
+    return ''.join(f'   Weapon = {spec.engine_slot} {spec.weapon}\n'
+                   f'   AutoChooseSources = {spec.engine_slot} NONE\n'
+                   for key, spec in WEAPON_SLOTS.items() if opt['br_enable_' + key.lower()])
 
 
 def hero_strings(sk, opt):
@@ -174,7 +208,7 @@ End
 End
 """)
     equip_buttons = [('Rifle', 'PRIMARY', 'SABurton')]
-    equip_buttons.extend(('Equip' + key, slot, icon) for key, (_, slot, icon) in WEAPON_SLOTS.items())
+    equip_buttons.extend(('Equip' + key, spec.engine_slot, spec.icon) for key, spec in WEAPON_SLOTS.items())
     for key, slot, icon in equip_buttons:
         parts.append(f"""CommandButton {HERO_BUTTONS[key]}
   Command = SWITCH_WEAPON
@@ -335,13 +369,13 @@ End
         menu_controls = {8: 'Command_AttackMove', 12: HERO_BUTTONS['Back'], 13: 'Command_Guard', 14: 'Command_Stop'}
         for index, owned, locked in menu_states(keys['Weapons']):
             slots = menu_controls | {1: HERO_BUTTONS['Rifle']}
-            slots.update({WEAPON_SLOTS[key][0]: HERO_BUTTONS[key] for key in locked})
-            slots.update({WEAPON_SLOTS[key][0]: HERO_BUTTONS['Equip' + key] for key in owned})
+            slots.update({WEAPON_SLOTS[key].menu_slot: HERO_BUTTONS[key] for key in locked})
+            slots.update({WEAPON_SLOTS[key].menu_slot: HERO_BUTTONS['Equip' + key] for key in owned})
             panels[f'Weapons{index}'] = slots
         for index, owned, locked in menu_states(keys['Killstreaks']):
             slots = menu_controls.copy()
-            slots.update({KILLSTREAK_SLOTS[key][0]: HERO_BUTTONS[key] for key in locked})
-            slots.update({KILLSTREAK_SLOTS[key][0]: HERO_BUTTONS[KILLSTREAK_SLOTS[key][1]] for key in owned})
+            slots.update({KILLSTREAK_SLOTS[key].menu_slot: HERO_BUTTONS[key] for key in locked})
+            slots.update({KILLSTREAK_SLOTS[key].menu_slot: HERO_BUTTONS[KILLSTREAK_SLOTS[key].action] for key in owned})
             panels[f'Killstreaks{index}'] = slots
         for panel, slots in panels.items():
             buttons = ''.join(f'  {slot} = {button}\n' for slot, button in sorted(slots.items()))
@@ -565,3 +599,36 @@ def hero_modules(family, opt):
     TriggeredBy = Upgrade_{HERO}ClusterBuy
    End
 """
+
+
+def spend_upgrade(unit, purchase):
+    return ('NAMED_RECEIVE_UPGRADE', [('unit', unit), ('upgrade', f'Upgrade_{HERO}{purchase}Spent')])
+
+
+def hero_purchase_scripts(opt, i, player, starter, joined):
+    scripts = []
+    for key, spec in KILLSTREAK_SLOTS.items():
+        if opt[spec.setting]:
+            args = [('unit', starter), ('power', spec.power)]
+            scripts.append(Script(f'{PREFIX}Spend{key}{i}', [
+                ('NAMED_SET_SPECIAL_POWER_COUNTDOWN', args + [('int', 0)]),
+                ('NAMED_STOP_SPECIAL_POWER_COUNTDOWN', args),
+                spend_upgrade(starter, key),
+            ], conditions=[('PLAYER_TRIGGERED_SPECIAL_POWER_FROM_NAMED',
+                            [('side', player), ('power', spec.power), ('unit', starter)])], once=False))
+    if opt['br_enable_c4']:
+        armed = f'{PREFIX}C4Armed{i}'
+        # Spending follows a successful placement. Detonation and lost targets only lower the count.
+        for count in range(opt['br_c4_limit'] + 1):
+            charge_count = ('PLAYER_HAS_OBJECT_COMPARISON', [
+                ('side', player), ('comparison', 2), ('int', count), ('type', C4_CHARGE)])
+            if count:
+                scripts.append(Script(f'{armed}_Place{count}',
+                                      [spend_upgrade(starter, 'C4'), set_counter(armed, count)],
+                                      conditions=[counter(joined, 2, 1), counter(armed, 2, count - 1), charge_count],
+                                      once=False))
+            if count < opt['br_c4_limit']:
+                scripts.append(Script(f'{armed}_Clear{count}', [set_counter(armed, count)],
+                                      conditions=[counter(joined, 2, 1), counter(armed, 4, count), charge_count],
+                                      once=False))
+    return scripts

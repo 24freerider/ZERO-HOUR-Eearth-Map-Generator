@@ -97,4 +97,3 @@ SOURCE CODE
    separately. Up to five can be planted before detonating them together.
    The countdown shows when the next radioactive zone closes. Infantry recover after
    the configured delay without damage. The last player with infantry wins.
-

@@ -3,6 +3,14 @@ ZERO HOUR EARTH - changelog
 Versioning: 0.X.Y - X = new feature / bigger change, Y = bug fix.
 Versions 0.1 - 0.8 were numbered afterwards (the program used to be called "CNC Earth").
 
+v0.53.29
+- Integrate the configurable 2–32-slot Battle Royale mode and its map-local scripts, rules, and settings.
+- Connect Ranger, Rebel, and Red Guard capture commands to the Battle Royale upgrade for capturable tech structures.
+- Warn of the first radiation phase with a 20-second countdown, siren, minimap beacon, and campaign-style briefing.
+- Add the WEAPONS, Ability Shop, and Killstreaks panels, paid C4 and air support, and sniper balance controls.
+- Place three Nuke Trucks by default. Civilian cars allow free boarding and offer a $1,000 permanent scout-car purchase.
+- Separate Battle Royale hero purchases, zone scripting, and vehicle rules from generator orchestration.
+
 v0.53.7
 - Battle Royale now creates the starter before clearing the original base. The starter has 4x HP and there are 25% more street rebels where space allows.
 

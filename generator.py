@@ -27,7 +27,7 @@ from g_zini import ZombieIniMixin
 from g_zmode import ZombieModesMixin
 from g_invasion import InvasionMixin, INVASION_NUMBERS, INVASION_ROSTERS
 from g_broyale import BattleRoyaleMixin
-from g_brsettings import BR_SETTINGS
+from g_brsettings import BR_DEFAULTS, apply_battle_royale_options
 from g_output import OutputMixin
 
 
@@ -72,7 +72,7 @@ class Gen(TerrainMixin, RoadsMixin, BuildingsMixin, BasesMixin, NatureMixin, Ins
                  mode_invasion=False, invasion_faction='China', invasion_air=True,
                  mode_battle_royale=False, compact=True, light=False)
         o.update({key: bounds[0] for key, bounds in INVASION_NUMBERS.items()})
-        o.update({key: spec[0] for key, spec in BR_SETTINGS.items()})
+        o.update(BR_DEFAULTS)
         o.update({k: v for k, v in kw.items() if v is not None})
         if o['light']:
             # LIGHT = for the classic 32-bit game (GeneralsOnline / Steam): far fewer objects and units, roads kept
@@ -88,15 +88,7 @@ class Gen(TerrainMixin, RoadsMixin, BuildingsMixin, BasesMixin, NatureMixin, Ins
         # ZombieSurvival Defense = ZombieSurvival + a nuclear silo in the centre that must not fall
         self.battle_royale = bool(o['mode_battle_royale'])
         if self.battle_royale:
-            for key, (default, minimum, maximum, _, _) in BR_SETTINGS.items():
-                if isinstance(default, bool):
-                    o[key] = str(o[key]).lower() in ('true', '1', 'yes')
-                else:
-                    o[key] = min(maximum, max(minimum, int(o[key])))
-            o.update(mode_invasion=False, mode_clearance=False, mode_zombie=False, mode_zsurvival=False,
-                     mode_zdefense=False, insurgents=False, fortress=False, outposts=0, patrols=0,
-                     foot_patrols=0, ins_qrf=False, ins_bases=None, ai_paths=False, train=False,
-                     cars=False, traffic=False, civilians=False, farm_life=False, black_map=True)
+            apply_battle_royale_options(o)
         self.invasion = bool(o['mode_invasion'])
         if self.invasion:
             o.update(mode_clearance=False, mode_zombie=False, mode_zsurvival=False, mode_zdefense=False,

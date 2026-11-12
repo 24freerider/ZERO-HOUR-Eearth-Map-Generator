@@ -1,8 +1,10 @@
 """Map-local rules for the Battle Royale infantry and radiation."""
 import re
 
-from g_brhero import CAPTURE, HERO, hero_abilities_ini, hero_modules, hero_rifle_ini
+from g_brhero import CAPTURE, HERO, hero_abilities_ini, hero_alternate_weapons_ini, hero_modules, hero_rifle_ini
 from g_brsettings import FIRST_RADIATION_WARNING
+from g_brvehicles import transport_ini
+from g_brzone import ELITE_DROP, FIELD, ZONE_MARKER
 
 RIFLES = {
     'USA': 'AmericaInfantryRanger',
@@ -10,12 +12,6 @@ RIFLES = {
     'GLA': 'GLAInfantryRebel',
 }
 REBEL = 'EARTH_BR_StreetRebel'
-FIELD = 'RadiationFieldLarge'
-ZONE_MARKER = 'EARTH_BR_RadarMarker'
-ELITE_DROP = 'EARTH_BR_EliteDrop'
-HUMVEES = ('Humvee1', 'AmericaVehicleHumvee', 'AmericaVehicleMedic')
-NUKE_TRUCK = 'ConvoyTruckArmedWithNuke'
-VEHICLE_BUY_UPGRADE = 'Upgrade_EARTH_BR_BuyScoutVehicle'
 STARTERS = {family: 'EARTH_BR_Starter' + family for family in RIFLES}
 POI = {
     'Cluster': ('EnglishTVStatio', 'SuperweaponCarpetBomb', 'SUPERWEAPON_CarpetBomb'),
@@ -51,109 +47,11 @@ def structure_radiation_ini(catalog, models, radiation_pct):
     return '\n'.join([*profiles.values(), *structures])
 
 
-def transport_ini(catalog, models, opt):
-    parts = ['''CommandSet EARTH_BR_Transport
-  1 = Command_Evacuate
-  13 = Command_AttackMove
-  14 = Command_Stop
-End
-
-CommandSet EARTH_BR_CivilTransport
-  1 = Command_Evacuate
-  2 = Command_UpgradeAmericaSupplyLines
-  13 = Command_AttackMove
-  14 = Command_Stop
-End
-
-CommandSet EARTH_BR_NukeTransport
-  1 = Command_Evacuate
-  2 = Command_DetonateConvoyTruckNuke
-  14 = Command_Stop
-End
-
-Locomotor EARTH_BR_CivilDrive
-  Surfaces = GROUND RUBBLE
-  Speed = 65
-  SpeedDamaged = 35
-  TurnRate = 180
-  TurnRateDamaged = 150
-  Acceleration = 200
-  AccelerationDamaged = 120
-  Braking = 200
-  MinTurnSpeed = 0
-  TurnPivotOffset = -0.33
-  ZAxisBehavior = NO_Z_MOTIVE_FORCE
-  Appearance = FOUR_WHEELS
-  StickToGround = Yes
-End
-''', f'''Upgrade {VEHICLE_BUY_UPGRADE}
-  Type = OBJECT
-  BuildTime = 0
-  BuildCost = {opt['br_vehicle_price']}
-  DisplayName = SCRIPT:EARTH_BR_BuyScoutVehicle
-End
-
-CommandButton Command_UpgradeAmericaSupplyLines
-  Command = OBJECT_UPGRADE
-  Upgrade = {VEHICLE_BUY_UPGRADE}
-  Options = NOT_QUEUEABLE
-  TextLabel = SCRIPT:EARTH_BR_BuyScoutVehicle
-  DescriptLabel = SCRIPT:EARTH_BR_BuyScoutVehicleHelp
-  ButtonBorderType = UPGRADE
-End
-''']
-    for model in models:
-        modules = catalog.vehicle_modules.get(model, ())
-        native_ai = any(behavior == 'TransportAIUpdate' for behavior, _ in modules)
-        removals = ''.join(f'  RemoveModule {tag}\n' for behavior, tag in modules if behavior != 'TransportAIUpdate')
-        ai = '' if native_ai else '''   Behavior = TransportAIUpdate ModuleTag_EARTH_BR_TransportAI
-   End
-'''
-        # Locomotor belongs to the AI module. Write it after installing the replacement AI.
-        locomotor = '' if native_ai else '  Locomotor = SET_NORMAL EARTH_BR_CivilDrive\n'
-        armed = ' CAN_ATTACK' if model in (*HUMVEES[:2], NUKE_TRUCK) else ''
-        cabin = '''   Behavior = GarrisonContain ModuleTag_Transport01
-    ContainMax = 4
-    MobileGarrison = Yes
-    AllowInsideKindOf = INFANTRY
-    AllowNeutralInside = Yes
-    AllowEnemiesInside = No
-    PassengersAllowedToFire = Yes
-    NumberOfExitPaths = 0
-   End
-'''
-        civilian = model not in (*HUMVEES, NUKE_TRUCK)
-        purchase = f'''   Behavior = ProductionUpdate ModuleTag_EARTH_BR_VehicleQueue
-    MaxQueueEntries = 1
-   End
-   Behavior = CommandSetUpgrade ModuleTag_EARTH_BR_OwnScoutVehicle
-    TriggeredBy = {VEHICLE_BUY_UPGRADE}
-    CommandSet = EARTH_BR_Transport
-   End
-''' if civilian else ''
-        command_set = ('EARTH_BR_CivilTransport' if civilian else
-                       'EARTH_BR_NukeTransport' if model == NUKE_TRUCK else 'EARTH_BR_Transport')
-        vision = f"  ShroudClearingRange = {opt['br_vehicle_scout_range']}\n" if civilian else ''
-        nuke_weapon = '''  WeaponSet
-   Conditions = None
-   Weapon = PRIMARY ConvoyTruckSuicideWeapon
-   AutoChooseSources = PRIMARY NONE
-  End
-''' if model == NUKE_TRUCK else ''
-        parts.append(f"""Object {model}
-  KindOf = PRELOAD SELECTABLE CAN_CAST_REFLECTIONS VEHICLE TRANSPORT SCORE{armed}
-  CommandSet = {command_set}
-{vision}{nuke_weapon}{removals}  AddModule
-{ai}{cabin}{purchase}  End
-{locomotor}End
-""")
-    return '\n'.join(parts)
-
-
 def battle_royale_ini(radius, catalog, structure_models, transport_models, opt):
     parts = ['; Zero Hour Earth - Battle Royale (map-local rules)\n', hero_abilities_ini(opt),
              transport_ini(catalog, transport_models, opt)]
     xp = opt['br_drop_xp']
+    alternate_weapons = hero_alternate_weapons_ini(opt)
     # Separate starter templates give only the heroes the larger health pool.
     for family, tag in {'USA': '03', 'China': '02', 'GLA': '02'}.items():
         starter = STARTERS[family]
@@ -161,14 +59,6 @@ def battle_royale_ini(radius, catalog, structure_models, transport_models, opt):
         # Keep inherited weapon and stealth upgrades from overriding the hero shop.
         stock_tags = {'USA': ('10',), 'China': (), 'GLA': ('07', '09', '10')}[family]
         removals = ''.join(f'  RemoveModule ModuleTag_{stock_tag}\n' for stock_tag in (*stock_tags, CAPTURE[family][2]))
-        # Only the explicit equip buttons can lock a purchased weapon.
-        alternate_weapons = ''
-        if opt['br_enable_rpg']:
-            alternate_weapons += ('   Weapon = SECONDARY TunnelDefenderRocketWeapon\n'
-                                  '   AutoChooseSources = SECONDARY NONE\n')
-        if opt['br_enable_sniper']:
-            alternate_weapons += (f'   Weapon = TERTIARY {HERO}SniperRifle\n'
-                                  '   AutoChooseSources = TERTIARY NONE\n')
         weapons = ''.join(f"""  WeaponSet
    Conditions = {condition}
    Weapon = PRIMARY {HERO}Rifle{family}
